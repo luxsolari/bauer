@@ -143,12 +143,12 @@ class SelectionTests(unittest.TestCase):
                     run = subprocess.run([sys.executable, str(SCRIPT), str(path), '--enabled'], capture_output=True)
                     self.assertNotEqual(run.returncode, 0)
                     self.assertEqual(run.stdout, b'')
-                    self.assertEqual(run.stderr, b'bauer selection: invalid input\n')
+                    self.assertEqual(run.stderr, ('bauer selection: invalid input' + os.linesep).encode('ascii'))
             for flags in (['--min-severity', 'PRIVATE'], ['--enable'], ['--allow-external'], ['--packet-reviewed']):
                 run = subprocess.run([sys.executable, str(SCRIPT), str(path), *flags], capture_output=True)
                 self.assertNotEqual(run.returncode, 0)
                 self.assertEqual(run.stdout, b'')
-                self.assertEqual(run.stderr, b'bauer selection: invalid arguments\n')
+                self.assertEqual(run.stderr, ('bauer selection: invalid arguments' + os.linesep).encode('ascii'))
 
     def test_enabled_selection_cannot_access_keys_network_or_adapter(self):
         import contextlib

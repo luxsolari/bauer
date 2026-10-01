@@ -147,6 +147,17 @@ def normalize(document):
                 json.dumps(document['jev_selection'], sort_keys=True, allow_nan=False) !=
                 json.dumps(result['jev_selection'], sort_keys=True, allow_nan=False)):
             raise ValueError('selection metadata does not match evidence and policy')
+    from importlib.util import module_from_spec, spec_from_file_location
+    spec = spec_from_file_location('bauer_completion_gate', Path(__file__).resolve().parent / 'completion.py')
+    if spec is None or spec.loader is None:
+        raise ValueError('completion gate unavailable')
+    completion = module_from_spec(spec)
+    spec.loader.exec_module(completion)
+    result['completion_gate'] = completion.evaluate(document)
+    if ('completion_gate' in document and
+            json.dumps(document['completion_gate'], sort_keys=True, allow_nan=False) !=
+            json.dumps(result['completion_gate'], sort_keys=True, allow_nan=False)):
+        raise ValueError('completion metadata does not match supplied records')
     return result
 
 
@@ -184,6 +195,17 @@ def render_markdown(report):
     lines = ['# Bauer audit report', '', 'Scope: ' + text(report['scope']), '', '## Severity counts', '']
     lines.extend(['| Severity | Count |', '| --- | --- |'])
     lines.extend('| ' + level + ' | ' + str(report['counts'][level]) + ' |' for level in SEVERITIES)
+    gate = report['completion_gate']
+    lines.extend(['', '## Completion and applicability', '', 'Overall: ' + gate['status'], '',
+                  text(gate['authority']), '',
+                  '| Obligation | Applicability | Outcome | Satisfied | Reason | Evidence |',
+                  '| --- | --- | --- | --- | --- | --- |'])
+    for row in gate['obligations']:
+        reason = row['reason'] + ('; Gate: ' + row['gate_reason'] if 'gate_reason' in row else '')
+        lines.append('| ' + ' | '.join(text(v) for v in (row['id'], row['applicability'], row['status'],
+                     row['satisfied'], reason, row['evidence'])) + ' |')
+    if gate['dependency_coverage'] is not None:
+        lines.extend(['', 'Dependency identity coverage: ' + text(gate['dependency_coverage'])])
     lines.extend(['', '## Findings', ''])
     for finding in report['findings']:
         status = finding['status'] + (' (unconfirmed)' if finding['status'] == 'candidate' else '')

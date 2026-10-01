@@ -6,7 +6,7 @@ Bauer guides your coding agent through a security audit of a codebase. It traces
 
 ## Status
 
-Bauer is listed in the Claude/Codex marketplaces and Hermes tap. Version 0.2.0 adds deterministic optional-review selection and complete severity tables; release status is available on the [releases page](https://github.com/luxsolari/bauer/releases). Your agent runs the audit using the skill and its Python helpers. Installation checks and audit results are recorded below; neither certifies that an application is secure.
+Bauer is listed in the Claude/Codex marketplaces and Hermes tap. Version 0.2.0 adds deterministic optional-review selection, complete severity tables and a supplied-evidence completion/applicability gate; publication status is available on the [releases page](https://github.com/luxsolari/bauer/releases). Your agent runs the audit using the skill and its Python helpers. Installation checks and audit results are recorded below; neither certifies that an application is secure.
 
 ## Sources we check
 
@@ -29,6 +29,16 @@ Bauer uses advisory databases, weakness classifications and verification standar
 | [OpenSSF Scorecard](https://scorecard.dev/) | Checks of an open-source repository's security practices | The agent uses available per-check results as evidence, not as a blanket trust score. |
 
 Only OWASP retrieval and OSV queries have dedicated clients in this release. The other checks depend on the agent's tools, access and the application being audited. A dependency match still needs an applicability review. An unqueried feed stays unqueried in the report.
+
+## Completion and applicability
+
+Every audit must plan and account for the thirteen registered sources/frameworks, dependency coverage and relevant remote configuration, even when some checks are agent-mediated. Input `completion_checks` records applicability, outcome, specific reason and supporting evidence; `completion_scope` records exact inventory/approval/query identity sets and scoped hosted targets. Applicability `unknown` is not `not_applicable`. Missing records remain `unattempted`; access blocked, controls not tested and failed retrieval are distinct. The report computes an overall complete/partial ledger and displays every obligation in JSON and a Markdown table. A partial audit remains partial even with zero findings.
+
+The gate validates supplied records and references, not their factual truth or fresh agent classification. It performs no source/client queries and no remote access. An approved 90-package query out of 715 discovered scoped identities leaves 625 unresolved unless each exclusion has specific scope evidence; the remaining inventory is not automatically approved for disclosure. Supabase/Vercel settings require scoped authorized read-only evidence, not inference from source. GHSA needs an explicit applicability decision. CVE/NVD/KEV/EPSS cannot be dismissed from lack of custom-code CVEs while dependencies remain unqueried. ASVS depends on evidenced control scope, and SLSA source/build/distribution usually applies to plugin/CLI code despite stdlib-only runtime.
+
+At preflight plan the checks; at closing show the gate table/status, unresolved checks and ask permission to continue. Optional Jev outcomes remain separate and do not conceal base gaps or grant disclosure permission. Run `scripts/report.py` for both formats; `completion.py` is a support module, not a standalone CLI. See [exact completion schema](skills/bauer/references/report.md#completionapplicability-input-and-derived-gate).
+
+Actual frozen synthetic Claude session-local-plugin and Codex read-only local-skill exercises rendered the partial 90/715 ledger, evidenced complete/nonapplicable and unknown/partial cases, and all five severity counts. The first gate exercise predates the independently reproduced contradiction fix; nine completion tests and the original contradiction fixture verify the correction. Both hosts separately exercised the corrected helper with one eligible MEDIUM finding and dummy-only key presence, asked the scheduling/disclosure/cost question and stopped for consent. No user reply, enabled scheduling, approved packet or post-consent API request was exercised. These are supplied-fixture host mechanics, not a fresh feed audit or activated marketplace-plugin audit. Host permission/cache warnings and one Claude evidence-file read omission remain in the receipts; no sandbox or scanner bypass was used.
 
 ## Optional Jev review
 
@@ -173,7 +183,7 @@ The GitHub download may need authenticated access if the anonymous API quota is 
 
 ## What we tested
 
-- The current v0.2.0 suite has 85 offline tests, including deterministic selection, consent boundaries and the five-row severity table. Historical v0.1.0 hosted Linux/macOS/Windows CI on Python 3.9 and 3.13 ran 74 tests ([run](https://github.com/luxsolari/bauer/actions/runs/36898896800)); that receipt does not establish current-release CI.
+- The current v0.2.0 suite has 94 offline tests, including nine completion regressions, deterministic selection, consent boundaries and the five-row severity table. Historical v0.1.0 hosted Linux/macOS/Windows CI on Python 3.9 and 3.13 ran 74 tests ([run](https://github.com/luxsolari/bauer/actions/runs/36898896800)); that receipt does not establish current-release CI.
 - Independent bounded selection/report review passed seven probe groups, including 30 malformed/forged inputs and 30 input permutations, without new security/logic blockers. Real Claude/Codex policy exercises are scoped as described above; no live Jev or fresh security audit was performed for this change.
 - Actual OWASP source retrieval selected Web 2025 and LLM 2026; the LLM PDF category extraction is an agent step, and the downloaded cover's publication-date placeholder remains an explicit provenance discrepancy.
 - Approved synthetic live Jev packet returned a schema-validated response from pinned `jev-1.13.0`; no domain-calibration claim.

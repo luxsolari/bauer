@@ -6,7 +6,8 @@
 
 - Add the fifth stdlib helper, deterministic Jev selection: scheduling disabled by default, MEDIUM minimum when enabled, explicit severity overrides, stable all-finding queue and fail-closed policy validation. Selection does not authorize disclosure; existing packet consent remains mandatory.
 - Render all five severity counts, including zeros, in a dedicated Markdown table and require the same table in final agent responses. Preserve evidence statuses and supplemental Jev outcomes independently.
-- Add ten regression tests (84 total), bounded independent review and actual Claude/Codex synthetic policy/report exercises. These are not fresh security audits, activated marketplace-plugin checks or live Jev calls.
+- Add eleven regression tests (85 total), bounded independent review and actual Claude/Codex synthetic policy/report exercises. These are not fresh security audits, activated marketplace-plugin checks or live Jev calls.
+- Require a separate boolean-only helper-environment presence check and proactive offer for eligible findings when a key is present; distinguish unavailable interaction, explicit decline and missing/known-filtered credentials. Scheduling and final packet approval remain separate.
 - Include current persistent environment and secret-manager setup guidance; preserve historical release/install evidence and immutable earlier tags.
 
 ## [0.1.1] - 2026-10-01

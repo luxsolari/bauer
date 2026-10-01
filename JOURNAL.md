@@ -1,5 +1,11 @@
 # Journal
 
+## 2026-10-01 — Published Hermes CLI install/readback verified
+
+- Read authenticated public-install result/receipts and independently rehashed all twelve retained installed files: every digest matches canonical release213f085. ActualCLI tap/install succeeded with freshSAFE/ALLOWED scan, forceFalse, no bypass; installed helper JSON/Markdown and repeatedJSON succeeded.
+- Existinggh token remained memory-only and absent from sanitized artifacts; disposableHOME removed. Initial startup attempted shared runtime dependency/UI rebuild and timedout, then used source-supported HERMES_DISABLE_LAZY_INSTALLS=1 to disable runtime repairs only, not skill scanning. Launcher bootstrap limitation remains visible.
+- README replaces pendingHermes status with exercisedCLI boundaries and actual publictap commands. Open: docscommit/push; no claims of all desktop runtime behavior or detectionbenchmark. Files: README/JOURNAL; scratch authenticatedinstall receipts.
+
 ## 2026-10-01 — Imported Lux voice and README source catalog
 
 - Located Claude's synced lux-blog-voice skill, imported an exact copy into default Hermes creative skills and loaded it. Source/copy SHA256 both b2b3325a451ef68020d13021b0eb6ef4c0dbbe96dc8a0ee3d1213c3cd7ce811c; no other profile touched.

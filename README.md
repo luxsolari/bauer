@@ -113,7 +113,14 @@ python -m unittest discover -s tests -v
 python skills/bauer/scripts/report.py evidence.json
 ```
 
-Claude Code and Codex manifests are provided in this repository. Hermes uses the same `skills/bauer/` directory. Marketplace installation routes will be documented after their publication and readback checks, not guessed in advance.
+Claude Code and Codex manifests are provided in this repository. Hermes uses the same `skills/bauer/` directory. To install from the public Hermes tap:
+
+```sh
+hermes skills tap add luxsolari/lux-solari-hermes-plugins
+hermes skills install luxsolari/lux-solari-hermes-plugins/skills/bauer
+```
+
+The GitHub download may need authenticated access if the anonymous API quota is exhausted. Keep Hermes's security scanner enabled. Restart your session after installing.
 
 ## What we tested
 
@@ -122,7 +129,7 @@ Claude Code and Codex manifests are provided in this repository. Hermes uses the
 - Approved synthetic live Jev packet returned a schema-validated response from pinned `jev-1.13.0`; no domain-calibration claim.
 - Approved public OSV test inventory (`PyPI/requests/2.19.1`, not project inventory) returned ten source records grouped into five alias groups. Applicability stays unverified.
 - Read-only self-audit produced category coverage/evidence and deterministic reports; the mutable CI action finding prompted commit pinning. Known OSV leap-second timestamps fail closed as incomplete; nanosecond fractions are supported.
-- Isolated Claude/Codex local-marketplace installs and installed helper execution succeeded. Hermes's actual scanner/quarantine/installer API accepted the bundle without force; full CLI/tap installation is still pending because empty-home launcher bootstrap failed on a missing dependency.
+- Isolated Claude/Codex local-marketplace installs and installed helper execution succeeded. A public Hermes tap install also succeeded through its actual CLI with authenticated GitHub access and normal scanning. All twelve installed files matched the release source; the installed report helper produced JSON/Markdown and identical repeated JSON. The disposable-home launcher had bootstrap failures, so the test used the existing runtime interpreter with automatic runtime repairs disabled; skill scanning stayed enabled.
 
 These checks cover the helpers, API connections and audit procedure. They do not measure how many vulnerabilities Bauer misses. Installation evidence applies to the exact package tested; later changes need another readback.
 

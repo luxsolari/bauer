@@ -24,6 +24,10 @@ Known parser boundary: OSV RFC3339 leap-second timestamps (`:60`) are not suppor
 
 Keep OWASP category mappings, `cwe_ids`, advisory IDs/aliases, affected package evidence, reachability, source-attributed severity and threat signals distinct. Supplemental objects are retained by the report helper but not fully schema-validated: the agent must validate their values against retrieved sources. Jev can assess bounded supplied evidence, never decide package version arithmetic, alias equivalence or KEV membership.
 
+The helper bounds an input to 100 packages per invocation and 128 KiB; this is a local validation/resource bound, not permission to audit only the first batch and not a claim that OSV limits total inventory to 100. After exact inventory-disclosure approval, the agent may split the approved public resolved identities into bounded batches and aggregate deduplicated identity/provenance records. Complete pagination within each identity; failed/unsupported/unapproved identities remain gaps. No automatic batch orchestrator ships. Never assume all discovered identities were approved.
+
+Decide applicability for every registered source, including conditional GHSA; CVE/NVD/KEV/EPSS decisions depend on adjudicated applicable published CVEs and resolved inventory coverage. Distinguish never attempted from attempted retrieval failure. Use the mandatory `completion_checks`/`completion_scope` gate in `report.md`; the legacy arrays alone do not establish complete coverage.
+
 Record source outcomes in `source_checks`: source ID, checked/not_applicable/unavailable, reason, timestamp and snapshot reference. The existing `sources` schema is for year-edition OWASP provenance; preserve non-year framework versions and feed dates in supplemental `source_checks`/`framework_checks` rather than fabricating an edition year.
 
 Official API documentation: https://google.github.io/osv.dev/api/, https://docs.github.com/en/rest/security-advisories/global-advisories, https://nvd.nist.gov/developers/vulnerabilities, https://www.first.org/epss/.

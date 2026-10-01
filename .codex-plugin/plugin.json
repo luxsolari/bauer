@@ -12,6 +12,8 @@
   "interface": {
     "displayName": "Bauer",
     "shortDescription": "Audit OWASP security risks with evidence review.",
+    "longDescription": "Agent-led code, dependency and supply-chain security review with frozen OWASP guidance, opt-in OSV queries, deterministic evidence reports and supplemental Jev analysis.",
+    "capabilities": ["security audit", "dependency advisory review", "supply-chain review", "evidence reporting"],
     "developerName": "Lux Solari",
     "category": "Productivity",
     "defaultPrompt": "Use Bauer to audit this repository security with current OWASP guidance."

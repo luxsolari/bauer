@@ -21,7 +21,7 @@ Claude Code and Codex manifests are provided in this repository. Hermes uses the
 
 ## Exercised behavior
 
-- 74 offline tests passed locally on Python 3.9.6/macOS. Hosted cross-platform CI remains pending.
+- 74 offline tests passed locally on Python 3.9.6/macOS and in hosted Linux/macOS/Windows CI on Python 3.9 and 3.13 ([run](https://github.com/luxsolari/bauer/actions/runs/36898896800)).
 - Actual OWASP source retrieval selected Web 2025 and LLM 2026; the LLM PDF category extraction is an agent step, and the downloaded cover's publication-date placeholder remains an explicit provenance discrepancy.
 - Approved synthetic live Jev packet returned a schema-validated response from pinned `jev-1.13.0`; no domain-calibration claim.
 - Approved public OSV test inventory (`PyPI/requests/2.19.1`, not project inventory) returned ten source records grouped into five alias groups. Applicability stays unverified.
@@ -29,6 +29,8 @@ Claude Code and Codex manifests are provided in this repository. Hermes uses the
 - Isolated Claude/Codex local-marketplace installs and installed helper execution succeeded. Hermes's actual scanner/quarantine/installer API accepted the bundle without force; full CLI/tap installation is still pending because empty-home launcher bootstrap failed on a missing dependency.
 
 These checks exercise the workflow and transport, not exhaustive vulnerability discovery, production exploitation or certification. Instruction changes after an installation snapshot require new readback before claiming that snapshot verifies the latest package.
+
+A bounded source-only audit of OWASP-linked PyGoat at `19d17cc8874861142b330636d068bbde54e86b85` identified ten supported findings. Independent adjudication required two revisions (SQL impact/severity and file-read prerequisites); revised totals are five HIGH, four MEDIUM and one LOW. No target code was executed, no finding was reproduced, and intentional training vulnerabilities are not a production benchmark. All twenty OWASP categories and unqueried feed/framework gaps were recorded.
 
 ## Boundaries
 

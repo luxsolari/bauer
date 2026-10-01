@@ -1,5 +1,13 @@
 # Journal
 
+## 2026-10-01 — Hosted CI and application adjudication verified
+
+- Verified actual initial-source commit e2681b50892192e190236275f10837b76017c8e1 readback and hosted workflow 36898896800: all six Linux/macOS/Windows Python3.9/3.13 jobs succeeded with 74 tests each.
+- Parent verified application artifact hashes and independently adjudicated results: eight accepted, zero rejected, two needing revisions. Applied SQL bounded-impact severity HIGH→MEDIUM plus handler-seeded row preconditions, and file-read CSRF/application-mount boundaries; regenerated raw captured JSON/Markdown from new adjudicated input. Counts five HIGH, four MEDIUM, one LOW, all supported, none reproduced. Original evidence preserved.
+- First tool-captured large report text could not be parsed after transport/redaction processing; regenerated directly from subprocess stdout bytes to files rather than treating displayed output as exact JSON. No fabricated output substituted.
+- Marketplace preparation underway in three scoped branches; parent still owns commits/PRs/publication. README adds exercised CI/application boundaries; source runtime unchanged.
+- Open: marketplace verification/PRs/readback and canonical release. Files: README/JOURNAL; adjudicated artifacts in scratch.
+
 ## 2026-10-01 — Push protection blocked synthetic fixture
 
 - Created initial reviewed implementation commit, but GitHub rejected its push because a deliberately fake Slack-token string in a secret-filter test matched push protection. No source revision reached remote; no bypass applied.

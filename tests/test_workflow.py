@@ -46,12 +46,12 @@ class WorkflowTests(unittest.TestCase):
         for host in ('claude', 'codex'):
             manifest = json.loads((ROOT / ('.' + host + '-plugin/plugin.json')).read_text())
             self.assertEqual(manifest['name'], 'bauer')
-            self.assertEqual(manifest['version'], '0.1.1')
+            self.assertEqual(manifest['version'], '0.2.0')
         skill = (ROOT / 'skills/bauer/SKILL.md').read_text()
         self.assertTrue(skill.startswith('---\n'))
         description = next(line for line in skill.splitlines() if line.startswith('description: '))[13:]
         self.assertLessEqual(len(description), 60)
-        for path in ('scripts/report.py', 'scripts/sources.py', 'scripts/jev.py',
+        for path in ('scripts/report.py', 'scripts/sources.py', 'scripts/jev.py', 'scripts/selection.py',
                      'references/report.md', 'references/jev.md'):
             self.assertTrue((ROOT / 'skills/bauer' / path).is_file(), path)
         self.assertIn('scripts/jev.py', (ROOT / 'skills/bauer/references/jev.md').read_text())

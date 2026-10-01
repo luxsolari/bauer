@@ -1,7 +1,7 @@
 ---
 name: bauer
 description: Audit codebase security with OWASP and evidence review.
-version: 0.1.0
+version: 0.1.1
 author: Luciano Solari (luxsolari), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]

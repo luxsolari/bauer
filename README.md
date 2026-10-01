@@ -6,7 +6,7 @@ Bauer guides your coding agent through a security audit of a codebase. It traces
 
 ## Status
 
-Bauer 0.1.0 is [released](https://github.com/luxsolari/bauer/releases/tag/v0.1.0) and listed in the Claude/Codex marketplaces and Hermes tap. Your agent runs the audit using the skill and its Python helpers. Installation checks and audit results are recorded below; neither certifies that an application is secure.
+Bauer is listed in the Claude/Codex marketplaces and Hermes tap. Version 0.1.1 refreshes the documentation and records the host dogfood results; release status is available on the [releases page](https://github.com/luxsolari/bauer/releases). Your agent runs the audit using the skill and its Python helpers. Installation checks and audit results are recorded below; neither certifies that an application is secure.
 
 ## Sources we check
 
@@ -136,6 +136,10 @@ These checks cover the helpers, API connections and audit procedure. They do not
 A bounded source-only audit of OWASP-linked PyGoat at `19d17cc8874861142b330636d068bbde54e86b85` identified ten supported findings. Independent adjudication required two revisions (SQL impact/severity and file-read prerequisites); revised totals are five HIGH, four MEDIUM and one LOW. No target code was executed, no finding was reproduced, and intentional training vulnerabilities are not a production benchmark. All twenty OWASP categories and unqueried feed/framework gaps were recorded.
 
 ## Limits
+
+Actual Claude Code session-local plugin execution invoked `bauer:bauer` and read all four helpers. Codex execution loaded the local skill, inspected the native package and exercised bounded offline helper/report checks. Neither run exercised an activated marketplace plugin. Both used cached guidance, left their frozen source trees unchanged and found no new demonstrated security vulnerability.
+
+Claude retained one LOW candidate about publication-status wording heuristics and one INFORMATIONAL secret-filter limitation. The candidate was not reproduced: Web categories are checked exactly, and LLM downloads still require document extraction. Discovery uses a finite wording check, not an authoritative publication-status API. A single official download may be selected without an independently descriptive link label; the agent must verify the document. Secret-pattern screening is best effort and does not replace review of the packet before disclosure. Codex retained the already documented leap-second limitation. These results are scoped reviews, not proof that Bauer is safe under every host or input.
 
 Supply-chain review covers source protections, CI, build inputs, release artifacts and distribution, including AI components where present. Remote settings the agent cannot inspect remain untested. Both report formats come from the same frozen evidence through `report.py --format json|markdown`.
 

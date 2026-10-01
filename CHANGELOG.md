@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-01
+
+- Record actual Claude/Codex dogfood boundaries and known source-discovery/secret-filter limitations; refresh release packages with current documentation. Runtime helper behavior is unchanged.
+
 - Edit README using Lux's blog-voice guidance and add the thirteen-source catalog with descriptions and actual integration boundaries.
 
 - Explain with/without-Jev behavior, supplemental evidence-review benefits, disclosure/cost trade-offs and unmeasured accuracy boundaries.

@@ -46,7 +46,7 @@ class WorkflowTests(unittest.TestCase):
         for host in ('claude', 'codex'):
             manifest = json.loads((ROOT / ('.' + host + '-plugin/plugin.json')).read_text())
             self.assertEqual(manifest['name'], 'bauer')
-            self.assertEqual(manifest['version'], '0.1.0')
+            self.assertEqual(manifest['version'], '0.1.1')
         skill = (ROOT / 'skills/bauer/SKILL.md').read_text()
         self.assertTrue(skill.startswith('---\n'))
         description = next(line for line in skill.splitlines() if line.startswith('description: '))[13:]

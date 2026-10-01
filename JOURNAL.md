@@ -1,5 +1,30 @@
 # Journal
 
+## 2026-10-01 — Authenticated Claude adjudication and v0.1.1 preparation
+
+- Parent verified Claude evidence/stream SHA-256 against receipts and read cited source-discovery implementation. Actual plugin invocation and four-helper reads completed; frozen copies unchanged. Live JOURNAL changes were parent release tracking, not hidden target writes. Candidate publication-wording check remains unproven; single-download fallback and mandatory LLM extraction constrain claims. Best-effort secret detection remains explicitly documented, with packet consent unchanged.
+- Preparing documentation-only v0.1.1: two host manifests, skill version, version regression assertion, changelog and README current dogfood/limitations. No helper behavior changes; do not claim refreshed guidance, reproduced security defects or activated marketplace runtime exercise. All74 baseline tests passed before version edit; release checks pending.
+- Open: new CI, immutable tag/release and three marketplace synchronization/readbacks. Files: README, CHANGELOG, manifests, SKILL, tests/test_workflow.py, JOURNAL.
+
+## 2026-10-01 — Post-Claude release refresh requested
+
+- User requested current-state synchronization and a new repository/marketplace release after Claude dogfood finishes. Checked current canonical HEADdd9cdf and existing v0.1.0 publication; Codex/Hermes distributed source remains pinned213f085, so newer README/dogfood evidence is not in their release snapshots.
+- Open: Claude actualaudit pending. Parent must adjudicate results, apply needed fixes with tests, derive releaseversion from actual changes, update all manifests/skill/changelog pins, run hostedCI, publish immutable newtag/release and synchronize three distributions via reviewedPRs/readback. Preserve existingv0.1.0 tag and unrelatedIDEA.md.
+- No new version/tag/marketplaceupdate claimed yet. Files: JOURNAL only.
+
+## 2026-10-01 — Cross-host runtime dogfood result
+
+- ActualCodex0.158 CLI completed readonlyephemeral audit via local .agents/skills discovery, inspected fourhelpers/nativepackage and rendered frozenreport. Parent verified final/transcript/beforeafter hashes; all67 frozenfiles unchanged. Twenty categoryoutcomes (16reviewed4notapplicable), noCRITICAL/HIGH/MEDIUM/LOW, oneINFORMATIONAL knownleap-second boundary. No newdemonstrated vulnerability; nativepackagedREADME stale releasewording reported. Route is actualskill execution, not native marketplace activation.
+- Claude2.1.236 discovered session-local bauer:bauer but failedbeforeSkill/filetools: Notloggedin. Parent reran claudeauthstatus loggedInFalse. Alltwenty categories nottested, findings/counts null—not zero. No permissionbypass, credentialfiles read or Jev/externalinventory queries.
+- Open: user normalClaude CLIlogin then rerun saved read-only runner; nativeCodex activatedplugin audit and packagedREADME docs refresh separate gaps. Cachedguidance freshness/PDF extraction notrefreshed. All74runtime tests still pass locally.
+- Files: JOURNAL; scratch bauer-cross-host-audit verifiedresults/traces. No runtimeedits or safetycertification.
+
+## 2026-10-01 — Actual Claude/Codex self-dogfood started
+
+- User requested re-audit of Bauer and Claude/Codex implementations. Started real Claude Code session-local plugin audit with read-only tools and Codex readonly/ephemeral skill route on frozen source dd9cdf4944b7249f27797635e88ed5e7704207db plus native published package213f085. Host tool availability/loading traces and unchanged-source hashes are acceptance evidence; installation alone does not prove runtime audit behavior.
+- No Jev/code disclosure or dependency queries authorized in this task; keys stripped from child environments, CLI uses normal existing host auth without agent credential-file inspection. Cached OWASP snapshots explicitly stale/reference, not refreshed guidance. No global permission bypass, active plugin install or target edits.
+- Open: actual CLI auth/sandbox/loading and audit outcomes pending; no assurance or safety certification claimed. Files: JOURNAL; cross-host transcripts/artifacts under scratch.
+
 ## 2026-10-01 — Published Hermes CLI install/readback verified
 
 - Read authenticated public-install result/receipts and independently rehashed all twelve retained installed files: every digest matches canonical release213f085. ActualCLI tap/install succeeded with freshSAFE/ALLOWED scan, forceFalse, no bypass; installed helper JSON/Markdown and repeatedJSON succeeded.

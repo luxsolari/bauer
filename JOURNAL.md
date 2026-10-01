@@ -1,5 +1,16 @@
 # Journal
 
+## 2026-10-01 — Persistent Jev environment setup documentation
+
+- Replaced temporary prompt as the main Claude/Codex setup with persistent locally edited shell exports, explicit zsh/Bash startup distinctions and process inheritance/GUI boundaries. Added recommended 1Password CLI reference injection and persistent launcher function, with plaintext/dotfile risks and unresolved-reference cautions.
+- Verified adapter still reads only process environment; consulted official shell startup and 1Password op run docs. Isolated Bash/zsh startup tests verified synthetic export inheritance and launcher reference/argument forwarding with a mock op function. All74 runtime tests and git diff --check passed. No personal startup/credential files read or modified, real keys handled, or vault/API requests made; no live secret-manager integration claim.
+- Publication: user authorized pushing this correction and merging after CI passes. Submit README and journal together through a dedicated documentation PR. Packaged Codex README synchronization is outside this repository change and remains open. Runtime behavior and release tags unchanged. Files: README.md, JOURNAL.md.
+
+## 2026-10-01 — Jev setup prompt compatibility
+
+- User encountered zsh's `read: -p: no coprocess` using the Bash-specific README prompt. Reproduced the exact error in zsh; separated printf prompt from silent read so the same instructions support Bash and zsh. Updated Codex's shared setup wording as well.
+- Verified synthetic zsh environment inheritance without reading or printing a real key. Runtime helpers unchanged; no Jev request or credential setup performed. Open: documentation correction is local pending publication. Files: README.md, JOURNAL.md.
+
 ## 2026-10-01 — User-authorized admin marketplace merges
 
 - User explicitly authorized bypass of missing approving reviews with their admin credentials, after readiness checks. Rechecked green CI and exact unchanged PR heads; used gh admin squash with match-head-commit, without changing repository rules or credentials.

@@ -63,20 +63,45 @@ The adapter reads `TYPESAFE_API_KEY` from its execution environment. It does not
 
 ### Claude Code
 
-Supply the key to the environment **before launching `claude`**. A secret-manager launcher is preferred. For a one-session Bash launch on macOS/Linux, enter it at a hidden local prompt (not as a literal shell command that enters history):
+For persistent terminal setup on macOS/Linux, open your shell configuration in a local editor and add:
 
 ```bash
-read -r -s -p 'TypeSafe API key: ' TYPESAFE_API_KEY; printf '\n'
-export TYPESAFE_API_KEY
-claude
-unset TYPESAFE_API_KEY
+export TYPESAFE_API_KEY='REPLACE_WITH_YOUR_OWN_KEY'
 ```
 
-This example requires Bash; from another shell, run `bash` first. For Claude Desktop/editor integrations, supply the variable through that application's launch environment or supported local environment configuration and restart it. An export in an unrelated terminal is not enough.
+Replace the placeholder in the editor, not in a command typed into shell history. Use `~/.zshrc` for interactive zsh sessions (`$ZDOTDIR/.zshrc` if you set `ZDOTDIR`), or `~/.bashrc` for interactive non-login Bash sessions. Bash login shells read `~/.bash_profile`, `~/.bash_login` or `~/.profile` instead; add the export to the file your shell uses, or have that file load `.bashrc`.
+
+Open a new terminal, then run `claude`. The exported variable is inherited by Claude and its permitted helper subprocesses; Bauer only reads the environment and never reads or executes your shell configuration. A previously launched Claude process will not receive a later export.
+
+**A secret manager is recommended.** A literal key in shell configuration is plaintext and available to child processes. Keep that file out of shared dotfile repositories and restrict access to your account. If your shell configuration is tracked, use the secret-manager example below or load the export from a separate private file outside the repository; a private file is still plaintext.
+
+For Claude Desktop/editor integrations, supply the variable through that application's launch environment or supported local environment configuration and restart it. Terminal exports are not system-wide settings and do not automatically reach GUI applications.
 
 ### Codex
 
-Use the same hidden-prompt Bash sequence, replacing `claude` with `codex`. If Codex's shell environment policy filters out the key, review its `shell_environment_policy` in your user configuration and allow the helper to receive `TYPESAFE_API_KEY` under your existing policy. Do not broadly forward all credentials or store the literal key in shared settings. Managed policy may prohibit forwarding; report Jev unavailable rather than bypass it. Desktop/cloud executions need the variable in their actual execution environment, not just your local shell.
+Use the same persistent shell export, then launch `codex` from a new terminal. If Codex's shell environment policy filters out the key, review its `shell_environment_policy` in your user configuration and allow the helper to receive `TYPESAFE_API_KEY` under your existing policy. Do not broadly forward all credentials or store the literal key in shared settings. Managed policy may prohibit forwarding; report Jev unavailable rather than bypass it. Desktop/cloud executions need the variable in their actual execution environment, not just your local shell.
+
+### Secret-manager example: 1Password
+
+With [1Password CLI installed and authenticated](https://developer.1password.com/docs/cli/get-started/), save the TypeSafe key in a vault item and copy its field's secret reference. The example `op://Private/TypeSafe/api_key` is a placeholder: replace it with your actual reference, not the key itself.
+
+For a launch that keeps the literal key out of shell configuration and command history:
+
+```bash
+TYPESAFE_API_KEY='op://Private/TypeSafe/api_key' op run -- claude
+```
+
+For Codex, replace `claude` with `codex`. [`op run`](https://developer.1password.com/docs/cli/secrets-environment-variables/) resolves the reference and injects the key into the launched process. Keep its default output masking enabled. The key still exists in that process's environment; masking is not an access-control boundary.
+
+For a persistent shortcut, put this function in your `.zshrc` or `.bashrc` **instead of the plaintext export**, then open a new terminal and run `claude-jev`:
+
+```bash
+claude-jev() {
+  TYPESAFE_API_KEY='op://Private/TypeSafe/api_key' op run -- claude "$@"
+}
+```
+
+The function stores only a reference and loads the secret when you launch Claude. Do not pass the unresolved `op://` reference directly to `claude`; Bauer does not resolve secret-manager references. Other secret managers work too if their launcher supplies the resolved `TYPESAFE_API_KEY` to the helper's execution environment. This example's command syntax was checked against 1Password's documentation; no live vault retrieval was exercised.
 
 ### Hermes
 

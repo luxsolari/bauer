@@ -1,5 +1,10 @@
 # Journal
 
+## 2026-10-01 — Broader plugin description
+
+- User requested exact description: Evidence-backed security audits with optional Jev review. Applied to Claude/Codex manifest descriptions; other OWASP guidance references remain accurate and unchanged. Marketplace workers notified to synchronize wording without falsifying immutable v0.1.1 source parity.
+- Verification: JSON edit syntax checks passed; tests/manifest validation below. Open: marketplace publication and post-tag wording synchronization; existing release tag remains unchanged. Files: .claude-plugin/plugin.json, .codex-plugin/plugin.json, JOURNAL.
+
 ## 2026-10-01 — Authenticated Claude adjudication and v0.1.1 preparation
 
 - Parent verified Claude evidence/stream SHA-256 against receipts and read cited source-discovery implementation. Actual plugin invocation and four-helper reads completed; frozen copies unchanged. Live JOURNAL changes were parent release tracking, not hidden target writes. Candidate publication-wording check remains unproven; single-download fallback and mandatory LLM extraction constrain claims. Best-effort secret detection remains explicitly documented, with packet consent unchanged.

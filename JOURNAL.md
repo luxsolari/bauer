@@ -1,5 +1,11 @@
 # Journal
 
+## 2026-10-01 — User-authorized admin marketplace merges
+
+- User explicitly authorized bypass of missing approving reviews with their admin credentials, after readiness checks. Rechecked green CI and exact unchanged PR heads; used gh admin squash with match-head-commit, without changing repository rules or credentials.
+- Claude PR8 merged4b7b5f0b2aef41d4a9487c1d7fe6116c101b6f1d; Codex PR8 merged43e12e7f152ad5ed0146e41d8e93ef5eec62e4b7. Readbacks confirm MERGED. Fetched origin/main and verified Claude catalog exact correcteddescription/canonicalGitHub source, and Codex all22files canonicalb66402a bytes/SHA-256, manifestversion0.1.1/description. Hermes previous merge unchanged. v0.1.1 release tag unchanged.
+- Open: newly published installs/activated marketplace runtime were not rerun; published packaging readback does not establish those outcomes. Files: JOURNAL; scratch bauer-verify-marketplace-publication.py. No active profiles or unrelatedcheckouts edited.
+
 ## 2026-10-01 — v0.1.1 publication readback and marketplace gates
 
 - Published immutable v0.1.1 at9870701; six hosted CI jobs passed. Later description-only main revisionb66402a does not rewrite the tag. Parent independently verified Codex PR8's22files exact canonicalb66402a parity/hashes and Hermes merged12files exact9870701 parity.

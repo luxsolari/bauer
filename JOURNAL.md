@@ -1,5 +1,18 @@
 # Journal
 
+## 2026-10-01 — Imported Lux voice and README source catalog
+
+- Located Claude's synced lux-blog-voice skill, imported an exact copy into default Hermes creative skills and loaded it. Source/copy SHA256 both b2b3325a451ef68020d13021b0eb6ef4c0dbbe96dc8a0ee3d1213c3cd7ce811c; no other profile touched.
+- Applied its editorial/anti-slop checklist to technical README: cut slogan opener, repetitive contrast/bold labels, dense abstract phrasing and repeated source list; retained credential setup, consent, accuracy caveats and commands. No invented personal story or tone flourishes.
+- Added thirteen-row advisory/taxonomy/standard catalog from actual source registry, distinguishing bundled OWASP/OSV clients from agent-mediated checks. Vendor sources have no fake universal feed. Open: published-install verification remains separately pending.
+- Files: README.md, CHANGELOG.md, JOURNAL.md; imported personal skill is outside repo.
+
+## 2026-10-01 — Anonymous published Hermes install blocked
+
+- Read actual public-install receipt: tap add/readback succeeded, install fetch failed due anonymousGitHub quota0/60 before scanning. CLI returned0 despite error; installed skill absent. Parent verified receipt digest cae1d751db1687dbc57dfff6f874271e47207c7b20b06ea67685eb345d2443a7. No installation success claim.
+- Public HTTPSgit clones verified twelve release/tap files identical, not substitute proof for installer. Started authenticated retry using existing gh credentials only in memory with sanitized disposableHOME; no token printed/persisted, no scanner bypass. Results pending.
+- Open: actual authenticated install/readback and final status documentation. Runtime/tests remain unchanged. Files: JOURNAL; scratch published-install receipts.
+
 ## 2026-10-01 — README Jev mode comparison and benefits
 
 - Added side-by-side with/without-Jev behavior, same core audit/verification/report, optional supplemental focused judgments, traceability, explicit uncertainty, key/cost/disclosure and failure handling. Describes advantages as available review signals, not measured accuracy gains.

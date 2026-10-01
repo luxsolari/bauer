@@ -1,18 +1,40 @@
 # Bauer
 
-An F1-inspired security advisor, named after Jo Bauer: inspect the evidence, not the promise.
+Bauer takes its name from Jo Bauer, Formula 1's technical delegate.
 
-Bauer is a portable agent skill for authorized, adversarial codebase reviews against current OWASP Web and LLM Top 10 guidance. It combines source tracing and safely authorized tests with source provenance, deterministic JSON reporting, and optional TypeSafe Jev review of focused evidence questions.
+Bauer guides your coding agent through a security audit of a codebase. It traces attack paths, checks dependency advisories and reviews the supply chain, then produces JSON and Markdown reports with code evidence, proposed fixes and gaps in coverage. You can add TypeSafe Jev for a second opinion on selected findings.
 
 ## Status
 
-Bauer 0.1.0 is [released](https://github.com/luxsolari/bauer/releases/tag/v0.1.0) and listed in the Claude/Codex marketplaces and Hermes tap. Published-install verification is tracked separately. This is an agent-driven workflow, not a standalone scanner, penetration-testing engine, or certification. Tool tests do not demonstrate discovery accuracy.
+Bauer 0.1.0 is [released](https://github.com/luxsolari/bauer/releases/tag/v0.1.0) and listed in the Claude/Codex marketplaces and Hermes tap. Your agent runs the audit using the skill and its Python helpers. Installation checks and audit results are recorded below; neither certifies that an application is secure.
 
-## Optional Jev setup — bring your own key
+## Sources we check
+
+Bauer uses advisory databases, weakness classifications and verification standards. They answer different questions. The report records which sources the agent checked, which were irrelevant and which it could not access.
+
+| Source | What it tells us | How Bauer uses it |
+| --- | --- | --- |
+| [OWASP Web Top 10](https://owasp.org/Top10/) | Common web application security risks | A bundled helper retrieves the published list; the agent reviews the relevant code paths. |
+| [OWASP LLM Top 10](https://genai.owasp.org/) | Risks specific to LLM applications | The helper finds the publication; the agent extracts its categories and reviews LLM/tool/retrieval flows. |
+| [CWE](https://cwe.mitre.org/) | Types of software weakness, such as SQL injection | The agent assigns a root-cause classification supported by the evidence. |
+| [OSV](https://osv.dev/) | Advisories tied to package versions and commits | A bundled helper queries approved public package versions and records matches, aliases and source history. |
+| [GitHub Advisory Database](https://github.com/advisories) | Package vulnerabilities, malware advisories and fixes | The agent checks relevant records and reconciles their aliases with other sources. |
+| [CVE Program](https://www.cve.org/) | Identifiers and records for disclosed vulnerabilities | The agent verifies a known vulnerability's identity and record state. |
+| [NVD](https://nvd.nist.gov/) | CVE severity, weakness and affected-product information | The agent adds source-attributed details to applicable CVE findings. |
+| [CISA KEV](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) | Vulnerabilities known to have been exploited | The agent checks applicable CVEs to help prioritize remediation. |
+| [FIRST EPSS](https://www.first.org/epss/) | Estimated likelihood of CVE exploitation in the next 30 days | The agent records the score and observation date separately from severity. |
+| Vendor and maintainer advisories | Product-specific conditions, patches, workarounds and backports | The agent follows verified references for the components in scope. There is no single vendor feed. |
+| [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/) | Specific application security control requirements | The agent selects version-qualified requirements and records what was reviewed or left untested. |
+| [SLSA](https://slsa.dev/) | Source/build integrity and provenance requirements | The agent reviews the build and release process against applicable requirements. |
+| [OpenSSF Scorecard](https://scorecard.dev/) | Checks of an open-source repository's security practices | The agent uses available per-check results as evidence, not as a blanket trust score. |
+
+Only OWASP retrieval and OSV queries have dedicated clients in this release. The other checks depend on the agent's tools, access and the application being audited. A dependency match still needs an applicability review. An unqueried feed stays unqueried in the report.
+
+## Optional Jev review
 
 ### With or without Jev
 
-**The core audit is the same in both modes. Jev adds a structured second opinion on selected evidence; it does not unlock additional scanners or replace source tracing and tests.**
+The audit covers the same code and sources with or without Jev. Jev reviews selected evidence packets after the agent has investigated the finding.
 
 | | Without Jev | With Jev |
 | --- | --- | --- |
@@ -24,18 +46,18 @@ Bauer 0.1.0 is [released](https://github.com/luxsolari/bauer/releases/tag/v0.1.0
 | Data disclosure | No evidence sent to TypeSafe; the host agent and advisory services still have their own data policies | Selected redacted snippets/evidence also go to TypeSafe after approval |
 | Failure handling | Audit proceeds without Jev | API/key/response failures mark Jev unavailable; the underlying audit still proceeds |
 
-**What Jev adds:**
+Jev gives the reviewer a few things to work with:
 
-- **A separately recorded second opinion:** evaluate actual snippets, controls and test evidence rather than relying only on the auditing agent's conclusion. Agreement is not independent proof, and both models can share errors.
-- **Explicit uncertainty:** typed probabilities and an insufficient-evidence option make ambiguities visible for human review instead of burying them in confident prose.
-- **Focused review questions:** separate attacker control, missing context and control effectiveness so a reviewer can see which part needs further investigation.
-- **Traceable supplemental judgments:** retain validated answers, the pinned model, rubric version and exact request digest alongside the finding.
+- It evaluates the code snippets, controls and test evidence, rather than just the agent's summary.
+- Its probabilities and insufficient-evidence answer show where it is uncertain.
+- Separate questions about attacker control, missing context and control effectiveness help you decide what to investigate next.
+- The report keeps its answers, model version, question rubric and request digest with the finding.
 
-Use Jev when you want an additional evidence-review signal and can approve the disclosure. Skip it when TypeSafe access, cost or code-disclosure constraints make that inappropriate. **We have exercised the live integration, but have not measured an accuracy improvement, fewer false positives or domain-calibrated probabilities.** Confidence describes the answer distribution, not the probability that a finding is correct. Jev cannot suppress findings, lower severity, override a reproduced failure or automatically approve a fix.
+Use Jev when you want that extra review and can approve sending the packet. Skip it when cost or code-disclosure rules get in the way. We tested the live integration; we have not measured better accuracy or fewer false positives. Model agreement can still be wrong, and confidence is not the probability that a finding is correct. Jev cannot suppress findings, lower severity, override a reproduced failure or approve a fix.
 
 ### Configure your key
 
-**Jev is optional. Bauer can audit and report without it. To use Jev, you must provide your own TypeSafe API key and account; no key, credits or subscription are bundled.** Obtain a key through the [TypeSafe console](https://console.typesafe.ai/). Requests use your account and may incur provider charges.
+**Jev is optional, and you must supply your own API key to use it.** Get one from the [TypeSafe console](https://console.typesafe.ai/). Bauer includes no key, credits or subscription; requests use your account and may incur charges.
 
 The adapter reads `TYPESAFE_API_KEY` from its execution environment. It does not load a repository `.env` or save credentials. Never paste the key into an agent conversation, commit it, or put it inside the plugin. Prefer your secret manager; enter any key locally, outside the chat.
 
@@ -80,7 +102,7 @@ Ask the agent to check **presence only** in the helper's execution environment:
 python3 -c "import os; print('Jev key available:', bool(os.environ.get('TYPESAFE_API_KEY')))"
 ```
 
-Then ask: “Audit with Bauer; prepare a Jev evidence packet and ask before sending it.” Having a key available is **not consent to upload code**. Review the final redacted snippet packet before approval; the helper requires both `--allow-external` and `--packet-reviewed`. Missing keys or API failures leave the base audit available with Jev marked unavailable. Jev never overrides reproduced evidence or decides severity. See [the evidence/credential contract](skills/bauer/references/jev.md).
+Then ask: "Audit with Bauer; prepare a Jev evidence packet and ask before sending it." Review the final redacted snippets before approving disclosure. A configured key does not grant that approval; the helper requires both `--allow-external` and `--packet-reviewed`. If the key is missing or the API fails, Bauer continues the audit and marks Jev unavailable. See [the evidence and credential requirements](skills/bauer/references/jev.md).
 
 ## Local use
 
@@ -93,7 +115,7 @@ python skills/bauer/scripts/report.py evidence.json
 
 Claude Code and Codex manifests are provided in this repository. Hermes uses the same `skills/bauer/` directory. Marketplace installation routes will be documented after their publication and readback checks, not guessed in advance.
 
-## Exercised behavior
+## What we tested
 
 - 74 offline tests passed locally on Python 3.9.6/macOS and in hosted Linux/macOS/Windows CI on Python 3.9 and 3.13 ([run](https://github.com/luxsolari/bauer/actions/runs/36898896800)).
 - Actual OWASP source retrieval selected Web 2025 and LLM 2026; the LLM PDF category extraction is an agent step, and the downloaded cover's publication-date placeholder remains an explicit provenance discrepancy.
@@ -102,13 +124,13 @@ Claude Code and Codex manifests are provided in this repository. Hermes uses the
 - Read-only self-audit produced category coverage/evidence and deterministic reports; the mutable CI action finding prompted commit pinning. Known OSV leap-second timestamps fail closed as incomplete; nanosecond fractions are supported.
 - Isolated Claude/Codex local-marketplace installs and installed helper execution succeeded. Hermes's actual scanner/quarantine/installer API accepted the bundle without force; full CLI/tap installation is still pending because empty-home launcher bootstrap failed on a missing dependency.
 
-These checks exercise the workflow and transport, not exhaustive vulnerability discovery, production exploitation or certification. Instruction changes after an installation snapshot require new readback before claiming that snapshot verifies the latest package.
+These checks cover the helpers, API connections and audit procedure. They do not measure how many vulnerabilities Bauer misses. Installation evidence applies to the exact package tested; later changes need another readback.
 
 A bounded source-only audit of OWASP-linked PyGoat at `19d17cc8874861142b330636d068bbde54e86b85` identified ten supported findings. Independent adjudication required two revisions (SQL impact/severity and file-read prerequisites); revised totals are five HIGH, four MEDIUM and one LOW. No target code was executed, no finding was reproduced, and intentional training vulnerabilities are not a production benchmark. All twenty OWASP categories and unqueried feed/framework gaps were recorded.
 
-## Boundaries
+## Limits
 
-The audit source registry now covers OWASP Web/LLM Top 10, CWE, OSV, GitHub advisories, CVE, NVD, CISA KEV, FIRST EPSS, relevant vendor advisories, ASVS, SLSA and OpenSSF Scorecard. OWASP retrieval and OSV curated-inventory queries have dedicated bundled clients; the remaining checks are agent-mediated and conditional on relevance, permissions and available tools. Supply-chain review includes source/CI/build/release integrity, not just dependency advisories. Source availability and untested surfaces must appear in the report. `report.py --format json|markdown` renders both outputs from the same frozen evidence.
+Supply-chain review covers source protections, CI, build inputs, release artifacts and distribution, including AI components where present. Remote settings the agent cannot inspect remain untested. Both report formats come from the same frozen evidence through `report.py --format json|markdown`.
 
 - Read-only inspection by default; executing repository code requires permission and isolation.
 - No live-target exploitation, secret access, destructive tests or automatic remediation.

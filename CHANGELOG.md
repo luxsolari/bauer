@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Edit README using Lux's blog-voice guidance and add the thirteen-source catalog with descriptions and actual integration boundaries.
+
 - Explain with/without-Jev behavior, supplemental evidence-review benefits, disclosure/cost trade-offs and unmeasured accuracy boundaries.
 
 - Document optional bring-your-own-key Jev setup for Claude Code, Codex, Hermes and other agents, including safe presence checks and packet-specific disclosure approval.

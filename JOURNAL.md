@@ -1,5 +1,12 @@
 # Journal
 
+## 2026-10-01 — v0.1.1 publication readback and marketplace gates
+
+- Published immutable v0.1.1 at9870701; six hosted CI jobs passed. Later description-only main revisionb66402a does not rewrite the tag. Parent independently verified Codex PR8's22files exact canonicalb66402a parity/hashes and Hermes merged12files exact9870701 parity.
+- Hermes PR4 merged normally as0f828137bedd3818098f4992070869910f93b255; remote SKILL blob matches canonical0.1.1.132Python+3shell suites and normal scanner were recorded by packaging worker; hosted checks passed. New public0.1.1 installer exercise remains untested (remote packaging readback is not installer proof).
+- Claude PR8 and Codex PR8 hosted checks passed; ordinary merges rejected because required review is missing. No admin override or fabricated review used. Claude catalog exactbroader description; Codex pinnedpost-tag metadatarevision explicitly, not falsely described as identicalrelease tag.
+- Open: approving reviews for https://github.com/luxsolari/lux-solari-plugins/pull/8 and https://github.com/luxsolari/lux-solari-codex-plugins/pull/8 then ordinarymerge/readbacks. Files: JOURNAL; marketplaceSOURCE/catalog/parity docs. Originalcheckouts and unrelatedIDEA.md untouched.
+
 ## 2026-10-01 — Broader plugin description
 
 - User requested exact description: Evidence-backed security audits with optional Jev review. Applied to Claude/Codex manifest descriptions; other OWASP guidance references remain accurate and unchanged. Marketplace workers notified to synchronize wording without falsifying immutable v0.1.1 source parity.

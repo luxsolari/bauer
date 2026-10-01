@@ -1,5 +1,11 @@
 # Journal
 
+## 2026-10-01 — README Jev mode comparison and benefits
+
+- Added side-by-side with/without-Jev behavior, same core audit/verification/report, optional supplemental focused judgments, traceability, explicit uncertainty, key/cost/disclosure and failure handling. Describes advantages as available review signals, not measured accuracy gains.
+- Explicitly rejects guaranteed false-positive reduction/domain calibration, model agreement as proof, evidence suppression/severity overrides and without-Jev implying fully offline/private host execution.
+- Open: docs verification/commit/push; distributed release package snapshots remain unchanged. Files: README.md, CHANGELOG.md, JOURNAL.md.
+
 ## 2026-10-01 — README optional bring-your-own-key setup
 
 - Added quick README setup for Claude Code (hidden-prompt Bash launch), Codex launch/subprocess policy boundaries, Hermes active-profile secret and narrow passthrough, and generic desktop/container/remote agents. Explicitly states optional integration, own TypeSafe key/account, no bundled credits, possible provider charges, and per-packet disclosure consent.

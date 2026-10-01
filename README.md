@@ -10,6 +10,31 @@ Bauer 0.1.0 is [released](https://github.com/luxsolari/bauer/releases/tag/v0.1.0
 
 ## Optional Jev setup — bring your own key
 
+### With or without Jev
+
+**The core audit is the same in both modes. Jev adds a structured second opinion on selected evidence; it does not unlock additional scanners or replace source tracing and tests.**
+
+| | Without Jev | With Jev |
+| --- | --- | --- |
+| Code, dependency and supply-chain review | Agent-led investigation using Bauer's procedures and available sources/tools | Same investigation |
+| Evidence verification | Source tracing, counterevidence and authorized tests | Same verification, plus focused questions about reviewed snippet packets |
+| Additional judgments | No Jev probabilities; missing values stay unavailable | Attacker-control and missing-context probabilities; effective/ineffective/insufficient-evidence control judgment with its distribution |
+| Report | Deterministic JSON/Markdown, severity, evidence status, remediation and gaps | Same report with supplemental Jev answers, model/rubric version and request digest |
+| Requirements | No TypeSafe account/key or Jev API cost | Your own TypeSafe key/account, network access and approval for each disclosed packet; provider charges may apply |
+| Data disclosure | No evidence sent to TypeSafe; the host agent and advisory services still have their own data policies | Selected redacted snippets/evidence also go to TypeSafe after approval |
+| Failure handling | Audit proceeds without Jev | API/key/response failures mark Jev unavailable; the underlying audit still proceeds |
+
+**What Jev adds:**
+
+- **A separately recorded second opinion:** evaluate actual snippets, controls and test evidence rather than relying only on the auditing agent's conclusion. Agreement is not independent proof, and both models can share errors.
+- **Explicit uncertainty:** typed probabilities and an insufficient-evidence option make ambiguities visible for human review instead of burying them in confident prose.
+- **Focused review questions:** separate attacker control, missing context and control effectiveness so a reviewer can see which part needs further investigation.
+- **Traceable supplemental judgments:** retain validated answers, the pinned model, rubric version and exact request digest alongside the finding.
+
+Use Jev when you want an additional evidence-review signal and can approve the disclosure. Skip it when TypeSafe access, cost or code-disclosure constraints make that inappropriate. **We have exercised the live integration, but have not measured an accuracy improvement, fewer false positives or domain-calibrated probabilities.** Confidence describes the answer distribution, not the probability that a finding is correct. Jev cannot suppress findings, lower severity, override a reproduced failure or automatically approve a fix.
+
+### Configure your key
+
 **Jev is optional. Bauer can audit and report without it. To use Jev, you must provide your own TypeSafe API key and account; no key, credits or subscription are bundled.** Obtain a key through the [TypeSafe console](https://console.typesafe.ai/). Requests use your account and may incur provider charges.
 
 The adapter reads `TYPESAFE_API_KEY` from its execution environment. It does not load a repository `.env` or save credentials. Never paste the key into an agent conversation, commit it, or put it inside the plugin. Prefer your secret manager; enter any key locally, outside the chat.

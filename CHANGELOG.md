@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Explain with/without-Jev behavior, supplemental evidence-review benefits, disclosure/cost trade-offs and unmeasured accuracy boundaries.
+
 - Document optional bring-your-own-key Jev setup for Claude Code, Codex, Hermes and other agents, including safe presence checks and packet-specific disclosure approval.
 
 ## [0.1.0] - 2026-10-01

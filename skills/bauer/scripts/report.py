@@ -11,6 +11,10 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit
 
 SEVERITIES = ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFORMATIONAL')
+RESOURCE_NOTE = ('Security audits can be token-intensive: repository tracing, source queries, '
+                 'repeated evidence review and report generation can consume substantial tokens. '
+                 'Usage depends on repository scope and your host model; exact tokens or cost '
+                 'cannot be predicted here. Optional Jev review may incur separate provider charges.')
 IDENTIFIER = re.compile(r'(?:A|LLM)(?:0[1-9]|10):20[0-9]{2}')
 
 
@@ -119,7 +123,9 @@ def normalize(document):
         findings.append(finding)
     findings.sort(key=lambda item: (SEVERITIES.index(item['severity']), item['path'], item['line'], item['rule']))
     result = dict(document)
-    result.update(schema_version='1.0', findings=findings,
+    if 'resource_note' in document and document['resource_note'] != RESOURCE_NOTE:
+        raise ValueError('resource note does not match policy')
+    result.update(schema_version='1.0', resource_note=RESOURCE_NOTE, findings=findings,
                   counts={level: sum(item['severity'] == level for item in findings) for level in SEVERITIES})
     if 'jev_selection' in document and 'jev_policy' not in document:
         raise ValueError('selection requires explicit policy')
@@ -192,7 +198,8 @@ def markdown_code(value):
 def render_markdown(report):
     """Render an already normalized report without collecting new evidence."""
     text = markdown_text
-    lines = ['# Bauer audit report', '', 'Scope: ' + text(report['scope']), '', '## Severity counts', '']
+    lines = ['# Bauer audit report', '', 'Scope: ' + text(report['scope']), '',
+             '## Resource note', '', RESOURCE_NOTE, '', '## Severity counts', '']
     lines.extend(['| Severity | Count |', '| --- | --- |'])
     lines.extend('| ' + level + ' | ' + str(report['counts'][level]) + ' |' for level in SEVERITIES)
     gate = report['completion_gate']

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-01
+
+- Require a concise token-usage warning in actual chat before full audit work and at closing; offer bounded scope when budget matters without imposing a new confirmation step, automatic caps or invented usage/cost estimates. Budget-limited gaps remain partial and use the existing continuation gate.
+- Add a stable generated `resource_note` to JSON and a visible warning to Markdown, with separate optional Jev provider-charge disclosure. Existing evidence inputs remain compatible; forged/stale supplied notes fail closed. No feed, credential, consent, completion or severity behavior changes.
+- Verify 96 offline tests, including RED→GREEN mandatory workflow and real report CLI warning/round-trip tests. Patch release corrects missing resource messaging; it is not a security fix or detection benchmark.
+
 ## [0.2.0] - 2026-10-01
 
 - Add a sixth stdlib support module for deterministic supplied-record completion/applicability validation across all thirteen registered sources/frameworks, exact dependency identity coverage and scoped remote settings. Missing/unknown/unattempted/blocked records remain partial; conditional checks require explicit decisions and evidence. JSON/Markdown retain every obligation. The actual report CLI invokes the module; no standalone completion CLI, new feed client or automatic disclosure ships.

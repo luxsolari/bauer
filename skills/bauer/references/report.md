@@ -19,6 +19,10 @@ Explain impact and prerequisites for every assigned level. If using CVSS, record
 
 Output JSON includes generated IDs, severity ordering and all five counts. Preserve source provenance, coverage, limitations, and supplemental Jev responses. No timestamps are added: identical frozen input produces identical output regardless of finding input order. Sources, coverage and supplemental arrays retain supplied order; prepare them in stable catalog order. Existing inputs without supplemental arrays remain valid, and the JSON schema version stays `1.0` (additive extension).
 
+## Resource note
+
+Every normalized JSON report includes the generated string `resource_note`; Markdown shows the same warning in a visible Resource note section. It explains substantial possible token use from repository tracing, source queries, repeated evidence review and report generation, scope/host-model variability and separate optional Jev charges. It is policy text, not measured usage, a cost estimate or a budget cap. Existing inputs without the field remain valid; supplied `resource_note` must exactly match policy or is rejected, so normalized reports round-trip without allowing a false cost claim to replace the warning. This is an additive schema 1.0 field. The skill also requires the warning in actual chat before full audit work and at closing; an artifact alone does not satisfy preflight.
+
 ## Jev selection policy (optional report field, mandatory workflow step)
 
 Every audit workflow executes `scripts/selection.py EVIDENCE.json` before optional Jev use; without `--enabled`, it returns a disabled plan and sends nothing. Copy its returned `policy` into evidence `jev_policy`. The report's additive input is an object with only `policy_version` (exactly `bauer-jev-selection-v1`), `enabled` (JSON boolean), and `min_severity` (one of the five uppercase severity levels). Missing fields default to that version, false and MEDIUM; `{}` is valid. Unknown fields, wrong types, unknown versions and invalid levels fail closed. Inputs without this field remain valid for report compatibility but do not show a selection plan.

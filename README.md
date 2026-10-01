@@ -6,7 +6,7 @@ Bauer guides your coding agent through a security audit of a codebase. It traces
 
 ## Status
 
-Bauer is listed in the Claude/Codex marketplaces and Hermes tap. Version 0.1.1 refreshes the documentation and records the host dogfood results; release status is available on the [releases page](https://github.com/luxsolari/bauer/releases). Your agent runs the audit using the skill and its Python helpers. Installation checks and audit results are recorded below; neither certifies that an application is secure.
+Bauer is listed in the Claude/Codex marketplaces and Hermes tap. Version 0.2.0 adds deterministic optional-review selection and complete severity tables; release status is available on the [releases page](https://github.com/luxsolari/bauer/releases). Your agent runs the audit using the skill and its Python helpers. Installation checks and audit results are recorded below; neither certifies that an application is secure.
 
 ## Sources we check
 
@@ -54,6 +54,22 @@ Jev gives the reviewer a few things to work with:
 - The report keeps its answers, model version, question rubric and request digest with the finding.
 
 Use Jev when you want that extra review and can approve sending the packet. Skip it when cost or code-disclosure rules get in the way. We tested the live integration; we have not measured better accuracy or fewer false positives. Model agreement can still be wrong, and confidence is not the probability that a finding is correct. Jev cannot suppress findings, lower severity, override a reproduced failure or approve a fix.
+
+### Selection policy
+
+Every audit now runs `selection.py` on frozen report evidence before optional Jev review. Default: disabled, minimum MEDIUM. With explicit review scheduling enabled, every CRITICAL/HIGH/MEDIUM finding is queued for packet approval, whether candidate, supported or reproduced. Use `--min-severity LOW` or another uppercase severity to explicitly change that boundary; there is no arbitrary cap. The queue includes below-threshold and disabled entries with reasons, not just selected findings.
+
+```sh
+python3 skills/bauer/scripts/selection.py evidence.json
+python3 skills/bauer/scripts/selection.py evidence.json --enabled
+python3 skills/bauer/scripts/selection.py evidence.json --enabled --min-severity HIGH
+```
+
+The helper validates through `report.normalize`; its output `policy` can be copied to evidence `jev_policy` so JSON/Markdown include the same queue. Same evidence and policy yield the same queue regardless of agent or finding order. Agents still discover findings and assign severity; fresh audits are not deterministic. The helper reads no key, constructs no packet, scans/executes no code and makes no network request. `pending_packet_approval` is not disclosure authorization: the final curated packet still requires approval and both existing adapter consent switches. Completed/unavailable adapter results and auditor-authored declined notes remain separate finding `jev` metadata; the queue is a plan, not a completion ledger. See [policy and outcomes](skills/bauer/references/jev.md).
+
+JSON supplies all five normalized severity counts. Markdown and the agent's final chat must show a separate compact `Severity | Count` table in CRITICAL/HIGH/MEDIUM/LOW/INFORMATIONAL order, including zeros. Prose counts or limited finding highlights do not replace it; level totals do not repeat on each finding row.
+
+Real Claude Code session-local plugin and Codex local-skill exercises both ran the selection/report helpers on the same 15 synthetic findings: nine eligible at MEDIUM, all evidence statuses preserved, identical parsed queues, and all five final-chat severity counts correct. Frozen trees stayed unchanged. These are policy/report checks, not a fresh security audit, live Jev request or activated marketplace-plugin test.
 
 ### Configure your key
 
@@ -149,7 +165,8 @@ The GitHub download may need authenticated access if the anonymous API quota is 
 
 ## What we tested
 
-- 74 offline tests passed locally on Python 3.9.6/macOS and in hosted Linux/macOS/Windows CI on Python 3.9 and 3.13 ([run](https://github.com/luxsolari/bauer/actions/runs/36898896800)).
+- The current v0.2.0 suite has 84 offline tests, including deterministic selection, consent boundaries and the five-row severity table. Historical v0.1.0 hosted Linux/macOS/Windows CI on Python 3.9 and 3.13 ran 74 tests ([run](https://github.com/luxsolari/bauer/actions/runs/36898896800)); that receipt does not establish current-release CI.
+- Independent bounded selection/report review passed seven probe groups, including 30 malformed/forged inputs and 30 input permutations, without new security/logic blockers. Real Claude/Codex policy exercises are scoped as described above; no live Jev or fresh security audit was performed for this change.
 - Actual OWASP source retrieval selected Web 2025 and LLM 2026; the LLM PDF category extraction is an agent step, and the downloaded cover's publication-date placeholder remains an explicit provenance discrepancy.
 - Approved synthetic live Jev packet returned a schema-validated response from pinned `jev-1.13.0`; no domain-calibration claim.
 - Approved public OSV test inventory (`PyPI/requests/2.19.1`, not project inventory) returned ten source records grouped into five alias groups. Applicability stays unverified.
@@ -162,7 +179,7 @@ A bounded source-only audit of OWASP-linked PyGoat at `19d17cc8874861142b330636d
 
 ## Limits
 
-Actual Claude Code session-local plugin execution invoked `bauer:bauer` and read all four helpers. Codex execution loaded the local skill, inspected the native package and exercised bounded offline helper/report checks. Neither run exercised an activated marketplace plugin. Both used cached guidance, left their frozen source trees unchanged and found no new demonstrated security vulnerability.
+Historical v0.1.1 Claude Code session-local plugin execution invoked `bauer:bauer` and read all four helpers. Codex execution loaded the local skill, inspected the native package and exercised bounded offline helper/report checks. Neither run exercised an activated marketplace plugin. Both used cached guidance, left their frozen source trees unchanged and found no new demonstrated security vulnerability.
 
 Claude retained one LOW candidate about publication-status wording heuristics and one INFORMATIONAL secret-filter limitation. The candidate was not reproduced: Web categories are checked exactly, and LLM downloads still require document extraction. Discovery uses a finite wording check, not an authoritative publication-status API. A single official download may be selected without an independently descriptive link label; the agent must verify the document. Secret-pattern screening is best effort and does not replace review of the packet before disclosure. Codex retained the already documented leap-second limitation. These results are scoped reviews, not proof that Bauer is safe under every host or input.
 

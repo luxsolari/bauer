@@ -27,6 +27,20 @@ def synthetic_document() -> dict:
 
 
 class ReportTests(unittest.TestCase):
+    def test_summary_table_has_all_five_levels_and_normalized_counts(self):
+        module = load_report()
+        all_levels = synthetic_document()
+        base = all_levels['findings'][0]
+        all_levels['findings'] = [dict(base, rule=level, severity=level, line=index + 1)
+                                  for index, level in enumerate(module.SEVERITIES)]
+        for document in (synthetic_document(), dict(synthetic_document(), findings=[]), all_levels):
+            normalized = module.normalize(document)
+            output = module.render_markdown(normalized)
+            expected = '| Severity | Count |\n| --- | --- |\n' + '\n'.join(
+                '| ' + level + ' | ' + str(normalized['counts'][level]) + ' |' for level in module.SEVERITIES)
+            self.assertIn(expected, output)
+            self.assertEqual(output.count('| Severity | Count |'), 1)
+
     def test_nested_metadata_renders_canonically(self):
         module = load_report()
         first = synthetic_document()
@@ -150,8 +164,8 @@ class ReportTests(unittest.TestCase):
         normalized = module.normalize(document)
         first = module.render_markdown(normalized)
         self.assertEqual(first, module.render_markdown(module.normalize(document)))
-        for text in ['# Bauer audit report', 'CRITICAL: 0', 'HIGH: 1', 'MEDIUM: 0', 'LOW: 0',
-                     'INFORMATIONAL: 0', normalized['findings'][0]['id'], 'candidate (unconfirmed)',
+        for text in ['# Bauer audit report', '| CRITICAL | 0 |', '| HIGH | 1 |', '| MEDIUM | 0 |', '| LOW | 0 |',
+                     '| INFORMATIONAL | 0 |', normalized['findings'][0]['id'], 'candidate (unconfirmed)',
                      'Evidence:', 'Input enters query', 'Remediation:', 'Bind parameters',
                      'Verification:', 'Local trace; runtime not tested', '## Remediation queue',
                      '## Coverage', '## Coverage gaps', 'No runtime', '## Limitations',

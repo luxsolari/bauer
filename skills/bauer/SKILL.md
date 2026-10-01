@@ -1,7 +1,7 @@
 ---
 name: bauer
 description: Audit codebase security with OWASP and evidence review.
-version: 0.2.0
+version: 0.2.1
 author: Luciano Solari (luxsolari), Hermes Agent
 license: MIT
 platforms: [linux, macos, windows]
@@ -26,6 +26,14 @@ Evidence-backed adversarial security review, named after F1 technical delegate J
 Python 3.9+ for bundled standard-library helpers. Resolve `scripts/` relative to this installed skill directory, not the audited repository. Network retrieval of public OWASP publications is needed for a current audit. Optional Jev needs `TYPESAFE_API_KEY` in the environment and explicit permission to send a specific reviewed packet to TypeSafe. Never ask for keys in chat or read credential files.
 
 Use host file/search/terminal/web tools: Hermes `read_file`, `search_files`, `terminal`, `web_search`, `web_extract`; equivalent tools on Claude Code/Codex. Never assume a security scanner is installed; inspect manifests and tools first. Do not install dependencies or run repository scripts without permission.
+
+## Mandatory resource warning
+
+Before full audit work, send this message to the user in ordinary chat (not just in an artifact):
+
+> Security audits can be token-intensive: repository tracing, source queries, repeated evidence review and report generation can consume substantial tokens. Usage depends on repository scope and your host model; exact tokens or cost cannot be predicted here. Optional Jev review may incur separate provider charges. If budget matters, we can agree on a bounded scope before proceeding.
+
+No additional confirmation is required for an already requested audit solely because of this warning. Do not invent estimates, budget caps or cost quotes. If the user raises a budget limit or requests narrower scope, agree on the boundary and record exclusions explicitly. Budget pressure never permits silently skipping mandatory checks or calling unfinished work complete: preserve unresolved obligations, report a partial audit and use the existing continuation gate before expanding scope or authority. Include the resource warning in the final chat as well as the generated report; do not claim measured usage without host/provider evidence.
 
 ## Procedure
 

@@ -27,6 +27,33 @@ def synthetic_document() -> dict:
 
 
 class ReportTests(unittest.TestCase):
+    def test_cli_resource_warning_is_generated_in_both_formats(self):
+        warning = ('Security audits can be token-intensive: repository tracing, source queries, '
+                   'repeated evidence review and report generation can consume substantial tokens. '
+                   'Usage depends on repository scope and your host model; exact tokens or cost '
+                   'cannot be predicted here. Optional Jev review may incur separate provider charges.')
+        with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
+            path = pathlib.Path(directory) / 'synthetic.json'
+            path.write_text(json.dumps(synthetic_document()), encoding='utf-8')
+            def run(format):
+                return subprocess.run([sys.executable, str(SCRIPT), str(path), '--format', format],
+                                      capture_output=True, text=True, timeout=10)
+            json_run, markdown_run = run('json'), run('markdown')
+            self.assertEqual(json_run.returncode, 0, json_run.stderr)
+            self.assertEqual(markdown_run.returncode, 0, markdown_run.stderr)
+            report = json.loads(json_run.stdout)
+            self.assertEqual(report.get('resource_note'), warning)
+            self.assertIn('## Resource note\n\n' + warning, markdown_run.stdout)
+            self.assertEqual(report['completion_gate']['status'], 'partial')
+            self.assertNotIn('tokens_used', report)
+            path.write_text(json_run.stdout, encoding='utf-8')
+            self.assertEqual(run('json').stdout, json_run.stdout)
+            path.write_text(json.dumps(dict(report, resource_note='No token cost')), encoding='utf-8')
+            for format in ('json', 'markdown'):
+                rejected = run(format)
+                self.assertNotEqual(rejected.returncode, 0)
+                self.assertEqual(rejected.stdout, '')
+
     def test_summary_table_has_all_five_levels_and_normalized_counts(self):
         module = load_report()
         all_levels = synthetic_document()

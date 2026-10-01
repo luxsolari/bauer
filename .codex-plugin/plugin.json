@@ -1,6 +1,6 @@
 {
   "name": "bauer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Evidence-backed security audits with optional Jev review.",
   "author": {
     "name": "Lux Solari"

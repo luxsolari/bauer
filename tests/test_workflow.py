@@ -64,11 +64,22 @@ class WorkflowTests(unittest.TestCase):
             self.assertEqual(run.stderr, '')
             self.assertNotIn('synthetic-presence-only-not-a-key', run.stdout + run.stderr)
 
+    def test_mandatory_token_warning_before_full_audit(self):
+        skill = (ROOT / 'skills/bauer/SKILL.md').read_text()
+        preflight = skill.split('## Procedure')[0]
+        for text in ('Before full audit work', 'send this message',
+                     'Security audits can be token-intensive', 'bounded scope',
+                     'No additional confirmation', 'partial', 'continuation'):
+            with self.subTest(requirement=text):
+                self.assertIn(text, preflight)
+        readme = (ROOT / 'README.md').read_text().split('## Status')[0]
+        self.assertIn('Security audits can be token-intensive', readme)
+
     def test_manifests_and_runtime_support_files_match(self):
         for host in ('claude', 'codex'):
             manifest = json.loads((ROOT / ('.' + host + '-plugin/plugin.json')).read_text())
             self.assertEqual(manifest['name'], 'bauer')
-            self.assertEqual(manifest['version'], '0.2.0')
+            self.assertEqual(manifest['version'], '0.2.1')
         skill = (ROOT / 'skills/bauer/SKILL.md').read_text()
         self.assertTrue(skill.startswith('---\n'))
         description = next(line for line in skill.splitlines() if line.startswith('description: '))[13:]

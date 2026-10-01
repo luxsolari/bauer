@@ -4,9 +4,15 @@ Bauer takes its name from Jo Bauer, Formula 1's technical delegate.
 
 Bauer guides your coding agent through a security audit of a codebase. It traces attack paths, checks dependency advisories and reviews the supply chain, then produces JSON and Markdown reports with code evidence, proposed fixes and gaps in coverage. You can add TypeSafe Jev for a second opinion on selected findings.
 
+## Token usage
+
+Security audits can be token-intensive: repository tracing, source queries, repeated evidence review and report generation can consume substantial tokens. Usage depends on repository scope and your host model; exact tokens or cost cannot be predicted here. Optional Jev review may incur separate provider charges.
+
+Bauer must surface this warning before full audit work and in the final response/report. If budget matters, ask for a bounded scope. The warning alone does not add a confirmation step to an already requested audit. Agreed exclusions stay explicit; budget pressure cannot silently skip mandatory checks or turn unfinished work into a complete audit. Unresolved checks remain partial and follow the continuation gate below.
+
 ## Status
 
-Bauer is listed in the Claude/Codex marketplaces and Hermes tap. Version 0.2.0 adds deterministic optional-review selection, complete severity tables and a supplied-evidence completion/applicability gate; publication status is available on the [releases page](https://github.com/luxsolari/bauer/releases). Your agent runs the audit using the skill and its Python helpers. Installation checks and audit results are recorded below; neither certifies that an application is secure.
+Bauer is listed in the Claude/Codex marketplaces and Hermes tap. Version 0.2.1 adds user-facing token warnings before audit work and in reports; it retains v0.2.0's deterministic optional-review selection, complete severity tables and supplied-evidence completion/applicability gate. Publication status is available on the [releases page](https://github.com/luxsolari/bauer/releases). Your agent runs the audit using the skill and its Python helpers. Installation checks and audit results are recorded below; neither certifies that an application is secure.
 
 ## Sources we check
 
@@ -183,7 +189,7 @@ The GitHub download may need authenticated access if the anonymous API quota is 
 
 ## What we tested
 
-- The current v0.2.0 suite has 94 offline tests, including nine completion regressions, deterministic selection, consent boundaries and the five-row severity table. Historical v0.1.0 hosted Linux/macOS/Windows CI on Python 3.9 and 3.13 ran 74 tests ([run](https://github.com/luxsolari/bauer/actions/runs/36898896800)); that receipt does not establish current-release CI.
+- The current v0.2.1 suite has 96 offline tests, including mandatory warning and real report CLI regressions, nine completion regressions, deterministic selection, consent boundaries and the five-row severity table. Historical v0.1.0 hosted Linux/macOS/Windows CI on Python 3.9 and 3.13 ran 74 tests ([run](https://github.com/luxsolari/bauer/actions/runs/36898896800)); that receipt does not establish current-release CI.
 - Independent bounded selection/report review passed seven probe groups, including 30 malformed/forged inputs and 30 input permutations, without new security/logic blockers. Real Claude/Codex policy exercises are scoped as described above; no live Jev or fresh security audit was performed for this change.
 - Actual OWASP source retrieval selected Web 2025 and LLM 2026; the LLM PDF category extraction is an agent step, and the downloaded cover's publication-date placeholder remains an explicit provenance discrepancy.
 - Approved synthetic live Jev packet returned a schema-validated response from pinned `jev-1.13.0`; no domain-calibration claim.

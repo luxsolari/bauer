@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "implementation": "OWASP retrieval and OSV curated-version query helpers; other sources are agent-mediated checks.",
+  "sources": [
+    {
+      "id": "owasp-web",
+      "url": "https://owasp.org/Top10/",
+      "mode": "helper",
+      "purpose": "Web risk categories; freeze latest published edition."
+    },
+    {
+      "id": "owasp-llm",
+      "url": "https://genai.owasp.org/",
+      "mode": "helper",
+      "purpose": "LLM risk categories; discover release, agent extracts PDF."
+    },
+    {
+      "id": "cwe",
+      "url": "https://cwe.mitre.org/",
+      "mode": "agent",
+      "purpose": "Classify evidenced root causes; verify mapping eligibility."
+    },
+    {
+      "id": "osv",
+      "url": "https://osv.dev/",
+      "mode": "helper",
+      "purpose": "Opt-in curated resolved public package version queries; applicability remains unverified."
+    },
+    {
+      "id": "ghsa",
+      "url": "https://github.com/advisories",
+      "mode": "conditional-agent",
+      "purpose": "Supplement package matches, aliases, malware and maintainer detail."
+    },
+    {
+      "id": "cve",
+      "url": "https://www.cve.org/",
+      "mode": "conditional-agent",
+      "purpose": "Verify known vulnerability identity and record state."
+    },
+    {
+      "id": "nvd",
+      "url": "https://nvd.nist.gov/",
+      "mode": "conditional-agent",
+      "purpose": "Enrich applicable CVEs with sourced CVSS/CWE/product context."
+    },
+    {
+      "id": "kev",
+      "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+      "mode": "conditional-agent",
+      "purpose": "Check known exploitation for applicable CVEs."
+    },
+    {
+      "id": "epss",
+      "url": "https://www.first.org/epss/",
+      "mode": "conditional-agent",
+      "purpose": "Record dated exploitation probability and percentile."
+    },
+    {
+      "id": "vendor",
+      "url": "https://www.cve.org/CVERecord/UserGuide",
+      "mode": "conditional-agent",
+      "purpose": "Follow verified vendor/maintainer references for fixes and backports; no universal vendor feed."
+    },
+    {
+      "id": "asvs",
+      "url": "https://owasp.org/www-project-application-security-verification-standard/",
+      "mode": "agent",
+      "purpose": "Version-qualified technical control verification requirements."
+    },
+    {
+      "id": "slsa",
+      "url": "https://slsa.dev/",
+      "mode": "agent",
+      "purpose": "Version-qualified source/build provenance and integrity requirements."
+    },
+    {
+      "id": "scorecard",
+      "url": "https://scorecard.dev/",
+      "mode": "conditional-agent",
+      "purpose": "Per-check upstream repository security practices; not trust certification."
+    }
+  ]
+}

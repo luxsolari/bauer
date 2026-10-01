@@ -1,5 +1,12 @@
 # Journal
 
+## 2026-10-01 — Publication paused for proactive-offer correction
+
+- User live Claude feedback showed omission of both key-presence check and proactive review offer. Paused before tag/release and all marketplace PRs; canonical PR2 had already merged as eaeaaa492e822166c3ab0766741a43582b06ca2c after green Linux/macOS/Windows Python3.9/3.13 CI (84 tests). No v0.2.0 tag exists.
+- Added workflow regression; observed 22 missing-document contract failures before amendment. Keep selection pure; separate boolean-only subprocess check, proactive queue/disclosure/cost question, distinct opt-in and final packet approval, explicit disabled/missing/known-filtered/not-offered reasons. False presence cannot distinguish filtering without host evidence.
+- Verified: all85 tests and both host validators pass. Four actual Claude/Codex frozen exercises checked synthetic-present and absent helper environments, with correct booleans, complete nine-entry eligible queues and five-count tables; present runs asked the ordinary-chat opt-in question and stopped without enabling selection. Absent runs recorded missing_key without inventing decline/filtering. First Claude wording allowed arbitrary subsets; strengthened no-subset guidance and reran all four hosts; final receipt validates actual tool outputs/queues/hashes. No adapter ran. Offer question only: no reply, packet preparation or live API execution exercised. Codex sandbox cache warnings retained. Artifacts: scratch/bauer-v020-delivery/offer-hosts-v2/verified-receipt.json; reproducible offer-hosts-v2.py and verify-offers.py.
+- Open: fresh exact-head CI, successor canonical merge, then repin all copied inventories. Existing scratch copies at eaeaaa4 are stale and unpublished. No TypeSafe request, real key access or active-profile edit. Files: SKILL, Jev reference, README/CHANGELOG/JOURNAL, tests/test_workflow.py.
+
 ## 2026-10-01 — v0.2.0 release candidate
 
 - Prepare additive v0.2.0 in both manifests, SKILL metadata/version assertions and changelog; five helpers and 84 offline tests. Deterministic selection defaults disabled/MEDIUM, opt-in scheduling is separate from mandatory packet consent; every report/final chat has all five severity rows.

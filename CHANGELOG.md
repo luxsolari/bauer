@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Document optional bring-your-own-key Jev setup for Claude Code, Codex, Hermes and other agents, including safe presence checks and packet-specific disclosure approval.
+
 ## [0.1.0] - 2026-10-01
 
 - Added opt-in OSV curated-inventory queries with bounded pagination, package-aware alias deduplication and response provenance; deterministic Markdown reporting and supplemental-check schema validation.

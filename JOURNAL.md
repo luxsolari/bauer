@@ -1,5 +1,27 @@
 # Journal
 
+## 2026-10-01 — README optional bring-your-own-key setup
+
+- Added quick README setup for Claude Code (hidden-prompt Bash launch), Codex launch/subprocess policy boundaries, Hermes active-profile secret and narrow passthrough, and generic desktop/container/remote agents. Explicitly states optional integration, own TypeSafe key/account, no bundled credits, possible provider charges, and per-packet disclosure consent.
+- Corrected stale unreleased status to actual v0.1.0/catalog publication while keeping published-install verification separate. Consulted official Claude settings/Codex environment reference and previously verified Hermes secrets documentation; avoided unsafe blanket credential forwarding or storing literal secrets in shared configuration.
+- Verification: all74tests pass, git diff whitespace check passes, Bash example syntax check passes without entering/reading a key or launching an agent. No real credential setup/test repeated in this docs task.
+- Open: documentation commit/push; marketplace packaged README remains pinned release snapshot unless separately refreshed. Files: README.md, CHANGELOG.md, JOURNAL.md.
+
+## 2026-10-01 — Authorized Claude/Codex admin merges verified
+
+- User explicitly authorized admin merges using existing gh credentials. Rechecked green hosted checks, merged both PR7s with --admin --squash --delete-branch without changing rulesets or disabling checks.
+- Verified states/merge timestamps and commits: Claude ebc1a738384bbd14f64f4f0a23a0416e79b0b441, Codex19b5f5b478cfdfc9343c330797bcdd46253057e5. Read exact default-branch catalog/manifest contents: Claude Bauer githubsource luxsolari/bauer; Codex Bauer0.1.0 skills path correct. Hermes previouslymerged remains verified.
+- Open: published install/download readback, final README/status refresh. Admin authorization applied only these two reviewed PRs, not a standing policy bypass.
+- Files: JOURNAL; merge and targetcontent evidence via GitHub reads.
+
+## 2026-10-01 — Canonical release and marketplace gates
+
+- Corrected canonical Codex interface required metadata and dated changelog; validators and 74 tests passed, committed/pushed source213f085dcd316923aab78324c8ea6a3e58713c34. Hosted six-job CI succeeded. Created annotated v0.1.0 and non-draft/non-prerelease GitHub Release, verified API readback and tag target matches exact sourcecommit.
+- Marketplace packages repinned byte-for-byte: Codex22files, Hermes12files. Parent reran16 marketplace tests/Bauer validator and132 HermesPython+3shell checks. All hosted marketplace PR checks passed, including Codex combinedCI despite separately reproduced local preexistingThreeAxes failure.
+- Hermes PR3 merged at67a7a241d955d6f23f860423ef4048a0c50bae80; exact remote skill readback exists. Public CLI tap/install readback now delegated with normal scanner, no active profile writes.
+- Claude PR7 and Codex PR7 are OPEN/BLOCKED requiring one approving GitHub review despite greenchecks. Normal merge refused; no adminbypass, ruleset change or fabricated review applied. User/human reviewer gate remains.
+- Open: publishedHermes install verification, humanapproval for Claude/Codex catalogmerges, final distribution readback. README publication-state refresh pending readback. Files: JOURNAL; PR handles/releases publicly verifiable.
+
 ## 2026-10-01 — Hosted CI and application adjudication verified
 
 - Verified actual initial-source commit e2681b50892192e190236275f10837b76017c8e1 readback and hosted workflow 36898896800: all six Linux/macOS/Windows Python3.9/3.13 jobs succeeded with 74 tests each.

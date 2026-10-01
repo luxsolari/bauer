@@ -6,7 +6,56 @@ Bauer is a portable agent skill for authorized, adversarial codebase reviews aga
 
 ## Status
 
-Initial implementation under development. No release or marketplace publication yet. This is an agent-driven workflow, not a standalone scanner, penetration-testing engine, or certification. Tool tests do not demonstrate discovery accuracy. Jev integration must remain optional and requires per-packet external-disclosure consent.
+Bauer 0.1.0 is [released](https://github.com/luxsolari/bauer/releases/tag/v0.1.0) and listed in the Claude/Codex marketplaces and Hermes tap. Published-install verification is tracked separately. This is an agent-driven workflow, not a standalone scanner, penetration-testing engine, or certification. Tool tests do not demonstrate discovery accuracy.
+
+## Optional Jev setup — bring your own key
+
+**Jev is optional. Bauer can audit and report without it. To use Jev, you must provide your own TypeSafe API key and account; no key, credits or subscription are bundled.** Obtain a key through the [TypeSafe console](https://console.typesafe.ai/). Requests use your account and may incur provider charges.
+
+The adapter reads `TYPESAFE_API_KEY` from its execution environment. It does not load a repository `.env` or save credentials. Never paste the key into an agent conversation, commit it, or put it inside the plugin. Prefer your secret manager; enter any key locally, outside the chat.
+
+### Claude Code
+
+Supply the key to the environment **before launching `claude`**. A secret-manager launcher is preferred. For a one-session Bash launch on macOS/Linux, enter it at a hidden local prompt (not as a literal shell command that enters history):
+
+```bash
+read -r -s -p 'TypeSafe API key: ' TYPESAFE_API_KEY; printf '\n'
+export TYPESAFE_API_KEY
+claude
+unset TYPESAFE_API_KEY
+```
+
+This example requires Bash; from another shell, run `bash` first. For Claude Desktop/editor integrations, supply the variable through that application's launch environment or supported local environment configuration and restart it. An export in an unrelated terminal is not enough.
+
+### Codex
+
+Use the same hidden-prompt Bash sequence, replacing `claude` with `codex`. If Codex's shell environment policy filters out the key, review its `shell_environment_policy` in your user configuration and allow the helper to receive `TYPESAFE_API_KEY` under your existing policy. Do not broadly forward all credentials or store the literal key in shared settings. Managed policy may prohibit forwarding; report Jev unavailable rather than bypass it. Desktop/cloud executions need the variable in their actual execution environment, not just your local shell.
+
+### Hermes
+
+1. In a local editor, add `TYPESAFE_API_KEY=<your-own-key>` to the **active profile's `.env`**, or map it through Hermes's supported secret manager. Default profile: `~/.hermes/.env`; named profiles use their own Hermes home.
+2. On macOS/Linux restrict the file: `chmod 600 ~/.hermes/.env` (use the actual profile path). On Windows restrict its file permissions to your account.
+3. Inspect `hermes config get terminal.env_passthrough`. Add `TYPESAFE_API_KEY` while preserving existing entries. If the list is empty:
+
+   ```sh
+   hermes config set terminal.env_passthrough '["TYPESAFE_API_KEY"]'
+   ```
+
+4. Restart Hermes if needed. Passthrough is necessary because Hermes sanitizes subprocess credentials. Do not disable that protection globally.
+
+### Other agents
+
+Inject `TYPESAFE_API_KEY` through the agent's secret manager or launch environment, and explicitly permit it in the Python helper's subprocess. For containers, remote workers and cloud agents, configure the secret in that worker—not only on your laptop. Never print the environment or key to debug setup.
+
+### Verify and use
+
+Ask the agent to check **presence only** in the helper's execution environment:
+
+```sh
+python3 -c "import os; print('Jev key available:', bool(os.environ.get('TYPESAFE_API_KEY')))"
+```
+
+Then ask: “Audit with Bauer; prepare a Jev evidence packet and ask before sending it.” Having a key available is **not consent to upload code**. Review the final redacted snippet packet before approval; the helper requires both `--allow-external` and `--packet-reviewed`. Missing keys or API failures leave the base audit available with Jev marked unavailable. Jev never overrides reproduced evidence or decides severity. See [the evidence/credential contract](skills/bauer/references/jev.md).
 
 ## Local use
 

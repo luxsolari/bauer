@@ -23,6 +23,9 @@ class CompletionTests(unittest.TestCase):
     def test_completion_workflow_is_mandatory_and_scoped(self):
         for relative in ('skills/bauer/SKILL.md', 'skills/bauer/references/report.md', 'README.md'):
             text = (ROOT / relative).read_text(encoding='utf-8')
+            if relative == 'README.md':
+                self.assertIn('skills/bauer/references/report.md#completionapplicability-input-and-derived-gate', text)
+                text += (ROOT / 'skills/bauer/references/report.md').read_text(encoding='utf-8')
             for required in ('completion_checks', 'completion_scope', 'unattempted',
                              'unknown', 'not_applicable', 'permission', 'partial'):
                 with self.subTest(file=relative, term=required):

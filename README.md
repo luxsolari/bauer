@@ -22,54 +22,38 @@ Load [the Bauer skill](skills/bauer/SKILL.md) and ask: “Audit this repository 
 
 Profiles select obligations, not permission. Unselected sources remain `out_of_scope`, never `not_applicable`. Unknown applicability remains a gap. Only OWASP retrieval and OSV have dedicated clients; other checks are agent-mediated. See the [source registry](skills/bauer/references/security-sources.json), [advisory procedure](skills/bauer/references/advisories.md) and [supply-chain procedure](skills/bauer/references/supply-chain.md).
 
-### Offline controls
+### Check mode or saved results
 
-Python 3.9+, standard library only. For a **new audit**, read the helper implementation and help, then make preflight the first workflow command:
+Ask your agent: "Show mode for Lean", "Show status of the saved report at /path/report.json", or "Show its Security Scorecard". Give the report path so the agent uses the same saved results throughout.
 
-```sh
-python3 skills/bauer/scripts/control.py preflight --help
-python3 skills/bauer/scripts/control.py preflight --mode lean --output /approved/scratch/run.json
-```
+These are read-only requests. They do not rerun the audit, check keys or query external sources. Mode shows a per-run profile, not a persistent setting; an audit-plan preview runs no checks. For a new audit, the agent shows the mode and decisions, then waits for your confirmation before inspecting the target. Declining stops it; corrections require a new confirmation. See [preflight, confirmation and CLI details](skills/bauer/references/report.md#run-record).
 
-Use `--output` only at an approved artifact path outside the target; existing files are never overwritten. Preflight returns a pending `run_record` with pinned `audit_profile`, selected/excluded sources, IDs, boolean presence and captured decisions. The agent presents its summary and asks for confirmation in ordinary chat, then **stops** before target inspection, selection, guidance or reports. Lean stays default; nondefault agent proposals must be labeled, not passed off as user requests.
+For direct use from this repository, Python 3.9+ is enough:
 
-Only after your real later response does the agent capture it with `control.py confirm --run-record /approved/scratch/run.json --decision confirm --user-response 'LITERAL RESPONSE' --response-ref ACTUAL_REFERENCE --output /approved/scratch/confirmed.json`. Placeholders are not consent; the response/reference must come from that interaction. Decline stops the audit. Corrections create a linked new pending record and require new confirmation. See [the run contract](skills/bauer/references/report.md#run-record).
+| Request | Command |
+| --- | --- |
+| Show mode | `python3 skills/bauer/scripts/control.py mode --mode lean` |
+| Inspect saved status | `python3 skills/bauer/scripts/control.py status /path/report.json` |
+| Show saved scorecard | `python3 skills/bauer/scripts/control.py scorecard /path/report.json --format markdown` |
 
-Presence always runs, even offline or with review disabled. An explicit disable needs `--review-decision FILE` containing state `explicit_disable_captured`, literal `user_instruction`, `decision_ref` and `reason`; the shortcut flag is removed. The helper checks structure, not user authority. It cannot prevent fabricated input, certify chat delivery or authorize external calls. Profile changes require a new preflight, not editing the original record.
-
-Saved controls and plan previews do **not** use preflight:
-
-```sh
-python3 skills/bauer/scripts/control.py audit --mode lean
-python3 skills/bauer/scripts/control.py mode --mode full
-python3 skills/bauer/scripts/control.py mode --mode custom --selected-source osv --selected-source cve --selected-source kev
-python3 skills/bauer/scripts/control.py mode --profile-file /explicit/path/profile.json
-python3 skills/bauer/scripts/control.py status /explicit/path/report.json --current-revision REVISION
-python3 skills/bauer/scripts/control.py scorecard /explicit/path/report.json --format markdown
-```
-
-`audit` is a dry-run plan for the agent workflow, not a scanner. `mode` inspects a per-run profile. Neither queries sources nor saves settings. `--profile-file` reads only an explicitly supplied nonsecret JSON profile object; it cannot be combined with inline overrides. No implicit settings search or persistent mode set exists. These are Python commands, not promised host slash commands. Installed agents resolve helpers relative to their skill.
-
-`status` reads frozen evidence: missing revision/time is unknown; an explicit mismatch warns `stale_revision`. A match does not prove freshness or unchanged dirty files. `scorecard` renders saved evidence without a new audit. Status bundles the same report handle, scorecard and counts; Markdown controls show all five severity rows. Both support JSON/Markdown and reject forged derived metadata. Saved inspection needs no key check or audit-warning preflight.
-
-Validated v0.2.1 saved gates migrate to explicit Full, retaining their original gate and gaps; never strip the old gate to force Lean.
+Status and scorecard support JSON or Markdown. Missing revision or audit time stays unknown. Status can compare a supplied revision with `--current-revision REVISION`; a mismatch warns `stale_revision`, but a match does not prove freshness. Validated v0.2.1 reports retain Full scope and their original gaps when read, without new confirmation.
 
 ### Completion and Security Scorecard
 
-Supply `audit_profile`, `completion_checks` and `completion_scope` using the [report contract](skills/bauer/references/report.md). The gate tracks selected obligations, exact dependency identities and relevant remote targets. Missing records stay `unattempted`; applicability `unknown` cannot satisfy a row. Local source does not establish deployed settings. Ask permission to continue unresolved disclosure, access or testing.
+Complete means the selected audit obligations are satisfied by supplied evidence, not that the project is secure. Partial means required work remains unresolved, including budget or access limits. Unknown applicability remains a gap; unselected checks are `out_of_scope`, not nonapplicable. The agent asks permission before continuing unresolved disclosure, access or testing.
 
-The Security Scorecard precedes severity counts: scope/revision/profile, satisfied checks/blockers, exclusions, dependency coverage, remote gaps, Jev queue/outcomes and next action. It has no numeric security rating or green badge. Findings retain severity and candidate/supported/reproduced evidence status. Remediation is `open`, `fix_reported` or evidenced `fix_verified`; omitted state defaults to open for queue accounting, not factual verification.
+The Security Scorecard gives you a quick view:
 
-```sh
-python3 skills/bauer/scripts/selection.py evidence.json --run-record /approved/scratch/confirmed.json
-python3 skills/bauer/scripts/report.py evidence.json --run-record /approved/scratch/confirmed.json --format json
-python3 skills/bauer/scripts/report.py evidence.json --run-record /approved/scratch/confirmed.json --format markdown
-python3 -m unittest discover -s tests -v
-```
+| Field | What to look for |
+| --- | --- |
+| Scope and mode | Audited scope, revision and profile (`audit_profile`). |
+| Completion and coverage | Satisfied checks, blockers, exclusions, dependency coverage and remote gaps. |
+| Findings and fixes | Severity and evidence status; separate counts for open findings, reported fixes and verified fixes. |
+| Review and next action | Jev queue/outcomes and the next unresolved finding or check. |
 
-Final chat names one report handle and pairs its scorecard/completion with all five rows of its `Severity | Count` table, including zeros. Zero findings is not safety. Frozen evidence yields stable reports; fresh agent discovery remains nondeterministic.
+A reported fix is not verified. Verification requires matching fix/recheck revisions and supplied passed-test evidence; the helper checks consistency, not test truth. The scorecard gives no numeric safety rating or certification.
 
-New reports require a matching confirmed run file or embedded record; pending/declined/missing confirmation rejects, even with empty completion input. Captures are unsigned assertions, not authenticated proof of user consent or chat delivery. `report.py --saved-report` only normalizes an existing validated saved gate as historical. Published v0.2.1 saved controls/Full migration need no new confirmation; unpublished run-record v1 is unsupported.
+Report and final chat identify the same report and show its scorecard before a separate `Severity | Count` table: CRITICAL, HIGH, MEDIUM, LOW and INFORMATIONAL, including zeros. Zero findings does not establish safety. [Completion rules](skills/bauer/references/report.md#completionapplicability-input-and-derived-gate) and the [scorecard contract](skills/bauer/references/report.md#security-scorecard) cover evidence fields and report-generation commands.
 
 ## Optional Jev
 

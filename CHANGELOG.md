@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.1] - 2026-10-02
+
+- Documentation-only patch: publish the streamlined README guidance for audit modes, saved status and Security Scorecard requests, with direct CLI examples. Runtime helpers, consent boundaries and known host limits are unchanged.
+
 ## [0.3.0] - 2026-10-02
 
 - Require one interactive mode/decision-record confirmation before any new-audit target work. Preflight creates pending v2; credential-free `confirm` captures a literal later response/reference in a linked new confirmed/declined record. Pending/declined/missing confirmation rejects reports, even empty completion input. Scope changes require new confirmation; unsigned consistency checks are not authenticated user consent or chat verification. Published v0.2.1 history remains supported; unpublished run-record v1 rejects. Host adherence is bounded; see README known limits.

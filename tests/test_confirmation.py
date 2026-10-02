@@ -14,7 +14,7 @@ SCRIPTS = Path(__file__).resolve().parents[1] / 'skills/bauer/scripts'
 
 class ConfirmationTests(unittest.TestCase):
     def cli(self, script, *args):
-        env = {k: v for k, v in os.environ.items() if k in ('PATH', 'HOME', 'TMPDIR')}
+        env = {k: v for k, v in os.environ.items() if k.upper() in ('PATH', 'HOME', 'TMPDIR', 'SYSTEMROOT')}
         return subprocess.run([sys.executable, str(SCRIPTS / script), *map(str, args)],
                               env=env, text=True, capture_output=True)
 

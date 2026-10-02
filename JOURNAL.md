@@ -1,5 +1,11 @@
 # Journal
 
+## 2026-10-02 — Targeted README controls and scorecard editorial pass
+
+- Replace helper-developer instructions in two README sections with ordinary agent requests, three direct CLI examples and a four-row scorecard guide. Keep read-only inspection separate from confirmed new audits; preserve historical Full gaps, unknown/partial/out-of-scope distinctions, budget/access limits, five severity counts and reported-versus-verified fixes. Existing report reference carries all schema/confirmation details; no new documentation file or runtime change.
+- Verified 138 offline tests and actual mode/status/Markdown scorecard commands against the committed v0.2.1 ASVS-gap fixture: Full remains partial, revision/time unknown, all five counts match the same report. All ten runtime helpers match published v0.3.0 bytes; only requested README sections change. Two documentation-contract tests now require exact reference links and retain every existing schema assertion in that linked contract; eight initial README literal failures were documentation placement, not runtime regressions. Humanizer/Lux voice pass removes schema lists and duplicated warnings; plain limitations remain.
+- Files: README.md, tests/test_completion.py, tests/test_run_record.py, JOURNAL.md. Exact word counts, before/after sections, diff and execution/remote receipts: scratch/bauer-readme-editorial/. No new host exercises, live advisory/Jev requests, secret reads, profile changes, version bump or tag rewrite. Existing installation/host limits stay open. Publication must pass exact-head CI and authorized merges, then 38-file Codex and 18-file Hermes readbacks; Claude follows canonical main without an artificial catalog change. Remote delivery results belong in the external receipt after freeze.
+
 ## 2026-10-02 — Authorized bounded v0.3.0 release freeze
 
 - User explicitly authorized publication with known host limits. Version 0.3.0 in both manifests, SKILL and assertions; profiles, scorecard, controls and confirmed run records ship together. New reports/selection require confirmation; validated v0.2.1 saved reports remain historical. No standalone scanner, credential management or authority certification.

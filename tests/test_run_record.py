@@ -44,6 +44,9 @@ class RunRecordTests(unittest.TestCase):
     def test_entry_and_report_docs_require_same_run_without_authority_claims(self):
         for relative in ('README.md', 'skills/bauer/SKILL.md', 'skills/bauer/references/report.md'):
             text = (ROOT / relative).read_text(encoding='utf-8')
+            if relative == 'README.md':
+                self.assertIn('skills/bauer/references/report.md#run-record', text)
+                text += (ROOT / 'skills/bauer/references/report.md').read_text(encoding='utf-8')
             for term in ('run_record', '--run-record', '--output', 'user_instruction', 'decision_ref'):
                 with self.subTest(relative=relative, term=term):
                     self.assertIn(term, text)

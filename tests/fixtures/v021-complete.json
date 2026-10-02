@@ -1,0 +1,336 @@
+{
+  "completion_checks": [
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#owasp-web",
+      "id": "owasp-web",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#owasp-llm",
+      "id": "owasp-llm",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#cwe",
+      "id": "cwe",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#osv",
+      "id": "osv",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#ghsa",
+      "id": "ghsa",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#cve",
+      "id": "cve",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#nvd",
+      "id": "nvd",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#kev",
+      "id": "kev",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#epss",
+      "id": "epss",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#vendor",
+      "id": "vendor",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#asvs",
+      "id": "asvs",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#slsa",
+      "id": "slsa",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#scorecard",
+      "id": "scorecard",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#dependency_coverage",
+      "id": "dependency_coverage",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    },
+    {
+      "applicability": "applicable",
+      "evidence": "fixture-evidence.json#remote_configuration",
+      "id": "remote_configuration",
+      "reason": "Fixture scoped control examined",
+      "status": "reviewed"
+    }
+  ],
+  "completion_gate": {
+    "assessed_scope": {
+      "coverage": {
+        "approved_count": 0,
+        "approved_ids": [],
+        "blocked": [],
+        "blocked_count": 0,
+        "excluded": [],
+        "excluded_count": 0,
+        "inventory_count": 0,
+        "inventory_evidence": "fixture-inventory.json",
+        "inventory_ids": [],
+        "queried_count": 0,
+        "queried_ids": [],
+        "query_evidence": "fixture-queries.json",
+        "status": "complete",
+        "unattempted_ids": [],
+        "unresolved_ids": []
+      },
+      "cve_assessment_evidence": "fixture-adjudication.json",
+      "published_cve_ids": [],
+      "remote_scope_evidence": "fixture-scope.json#no-hosted-services",
+      "remote_targets": []
+    },
+    "authority": "Supplied evidence trace validation only; not truth verification or safety certification.",
+    "dependency_coverage": {
+      "approved_count": 0,
+      "approved_ids": [],
+      "blocked": [],
+      "blocked_count": 0,
+      "excluded": [],
+      "excluded_count": 0,
+      "inventory_count": 0,
+      "inventory_evidence": "fixture-inventory.json",
+      "inventory_ids": [],
+      "queried_count": 0,
+      "queried_ids": [],
+      "query_evidence": "fixture-queries.json",
+      "status": "complete",
+      "unattempted_ids": [],
+      "unresolved_ids": []
+    },
+    "obligations": [
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#owasp-web",
+        "id": "owasp-web",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#owasp-llm",
+        "id": "owasp-llm",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#cwe",
+        "id": "cwe",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#osv",
+        "id": "osv",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#ghsa",
+        "id": "ghsa",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#cve",
+        "id": "cve",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#nvd",
+        "id": "nvd",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#kev",
+        "id": "kev",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#epss",
+        "id": "epss",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#vendor",
+        "id": "vendor",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#asvs",
+        "id": "asvs",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#slsa",
+        "id": "slsa",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#scorecard",
+        "id": "scorecard",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#dependency_coverage",
+        "id": "dependency_coverage",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      },
+      {
+        "applicability": "applicable",
+        "evidence": "fixture-evidence.json#remote_configuration",
+        "id": "remote_configuration",
+        "reason": "Fixture scoped control examined",
+        "record_supplied": true,
+        "satisfied": true,
+        "status": "reviewed"
+      }
+    ],
+    "policy_version": "bauer-completion-v1",
+    "status": "complete"
+  },
+  "completion_scope": {
+    "approved_ids": [],
+    "blocked": [],
+    "cve_assessment_evidence": "fixture-adjudication.json",
+    "excluded": [],
+    "inventory_evidence": "fixture-inventory.json",
+    "inventory_ids": [],
+    "published_cve_ids": [],
+    "queried_ids": [],
+    "query_evidence": "fixture-queries.json",
+    "remote_scope_evidence": "fixture-scope.json#no-hosted-services",
+    "remote_targets": []
+  },
+  "counts": {
+    "CRITICAL": 0,
+    "HIGH": 1,
+    "INFORMATIONAL": 0,
+    "LOW": 0,
+    "MEDIUM": 0
+  },
+  "coverage": [],
+  "findings": [
+    {
+      "categories": [
+        "A05:2025"
+      ],
+      "evidence": "Input enters query",
+      "id": "BAUER-0ed8732fa237104f",
+      "line": 5,
+      "path": "app.py",
+      "remediation": "Bind parameters",
+      "rule": "unsafe-query",
+      "severity": "HIGH",
+      "status": "candidate",
+      "title": "Unsafe query",
+      "verification": "Local trace; runtime not tested"
+    }
+  ],
+  "limitations": [
+    "Synthetic only"
+  ],
+  "resource_note": "Security audits can be token-intensive: repository tracing, source queries, repeated evidence review and report generation can consume substantial tokens. Usage depends on repository scope and your host model; exact tokens or cost cannot be predicted here. Optional Jev review may incur separate provider charges.",
+  "schema_version": "1.0",
+  "scope": "synthetic commit",
+  "sources": []
+}

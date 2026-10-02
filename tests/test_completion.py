@@ -16,7 +16,7 @@ def gate(document):
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module.evaluate(document)
+    return module.evaluate(dict(document, audit_profile=document.get('audit_profile', {'mode': 'full'})))
 
 
 class CompletionTests(unittest.TestCase):

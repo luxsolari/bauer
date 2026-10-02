@@ -7,12 +7,91 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from test_report import load_report, synthetic_document
+from test_report import load_report, synthetic_document, recorded_document
 
 SCRIPT = Path(__file__).resolve().parents[1] / 'skills/bauer/scripts/selection.py'
 
 
 class SelectionTests(unittest.TestCase):
+    def test_cli_naked_raw_evidence_rejects_without_queue(self):
+        with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
+            path = Path(directory) / 'raw.json'
+            for document in (synthetic_document(), dict(synthetic_document(), findings=[]),
+                             dict(synthetic_document(), report_origin='historical_saved_report')):
+                path.write_text(json.dumps(document))
+                for flags in ([], ['--enabled']):
+                    with self.subTest(document=document, flags=flags):
+                        run = subprocess.run([sys.executable, str(SCRIPT), str(path), *flags], capture_output=True)
+                        self.assertEqual(run.returncode, 1)
+                        self.assertEqual(run.stdout, b'')
+                        self.assertEqual(run.stderr, ('bauer selection: invalid input' + os.linesep).encode())
+
+    def test_cli_confirmed_boundary_and_saved_history_preserve_original(self):
+        module = load_report()
+        confirmed = recorded_document()
+        pending = confirmed['run_record']['confirmation']['pending_record']
+        # Use the actual confirmation validator to produce a genuine declined fixture.
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('selection_record', SCRIPT.with_name('run_record.py'))
+        assert spec is not None and spec.loader is not None
+        record_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(record_module)
+        declined = record_module.confirm(pending, 'decline', 'Synthetic decline', 'fixture:later-decline')
+        with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
+            path, record_path = Path(directory) / 'evidence.json', Path(directory) / 'record.json'
+            def run(*flags):
+                return subprocess.run([sys.executable, str(SCRIPT), str(path), *flags], capture_output=True)
+            path.write_text(json.dumps(synthetic_document()))
+            for record in (pending, declined, {}, None):
+                record_path.write_text(json.dumps(record))
+                rejected = run('--run-record', str(record_path), '--enabled')
+                self.assertEqual(rejected.returncode, 1)
+                self.assertEqual(rejected.stdout, b'')
+                self.assertEqual(rejected.stderr, ('bauer selection: invalid input' + os.linesep).encode())
+            record_path.write_text(json.dumps(confirmed['run_record']))
+            for document in (synthetic_document(), dict(synthetic_document(), findings=[])):
+                path.write_text(json.dumps(document))
+                accepted = run('--run-record', str(record_path), '--enabled')
+                self.assertEqual(accepted.returncode, 0, accepted.stderr)
+                selection = json.loads(accepted.stdout)
+                report = module.normalize_new_evidence(module.bind_run_record(document, confirmed['run_record']))
+                self.assertEqual(selection['run_id'], report['security_scorecard']['run_id'])
+                self.assertEqual(selection['record_id'], report['security_scorecard']['record_id'])
+            path.write_text(json.dumps(dict(synthetic_document(), audit_profile={'mode': 'full'})))
+            self.assertEqual(run('--run-record', str(record_path)).returncode, 1)
+            self.assertEqual(run('--run-record', str(Path(directory) / 'missing.json')).stdout, b'')
+            for name in ('complete', 'asvs-gap', 'disabled-policy'):
+                original = json.loads((SCRIPT.parents[3] / ('tests/fixtures/v021-' + name + '.json')).read_text())
+                saved = module.normalize_saved(original)
+                self.assertEqual(saved['audit_profile']['mode'], 'full')
+                self.assertEqual(saved['completion_migration']['legacy_gate'], original['completion_gate'])
+                if name == 'asvs-gap':
+                    self.assertIn('asvs', [row['id'] for row in saved['security_scorecard']['blockers']])
+                path.write_text(json.dumps(original))
+                before = path.read_bytes()
+                for flags in ([], ['--enabled'], ['--enabled', '--min-severity', 'HIGH']):
+                    accepted = run(*flags)
+                    self.assertEqual(accepted.returncode, 0, accepted.stderr)
+                    selection = json.loads(accepted.stdout)
+                    self.assertEqual([item['id'] for item in selection['queue']],
+                                     [item['id'] for item in saved['findings']])
+                self.assertEqual(path.read_bytes(), before)
+                self.assertEqual(module.normalize_saved(saved), saved)
+                for field in ('completion_gate', 'completion_migration', 'security_scorecard', 'jev_selection'):
+                    forged = copy.deepcopy(saved)
+                    forged[field] = {}
+                    path.write_text(json.dumps(forged))
+                    rejected = run('--enabled', '--min-severity', 'HIGH')
+                    self.assertEqual(rejected.returncode, 1)
+                    self.assertEqual(rejected.stdout, b'')
+                    self.assertEqual(rejected.stderr, ('bauer selection: invalid input' + os.linesep).encode())
+            for helper in (module.normalize_new_evidence, module.normalize_saved):
+                for document in (synthetic_document(), dict(synthetic_document(), report_origin='historical_saved_report')):
+                    with self.assertRaises(ValueError):
+                        helper(document)
+            # The aggregation API remains pure and backward-compatible, not a CLI consent boundary.
+            self.assertEqual(len(module.normalize(synthetic_document())['findings']), 1)
+
     def test_default_policy_disabled_medium_boundary_for_every_status(self):
         module = load_report()
         document = synthetic_document()
@@ -73,7 +152,7 @@ class SelectionTests(unittest.TestCase):
     def test_cli_repeated_bytes_permutations_and_explicit_opt_in(self):
         self.assertTrue(SCRIPT.is_file(), 'selection CLI missing')
         module = load_report()
-        document = synthetic_document()
+        document = recorded_document()
         document['findings'].append(dict(document['findings'][0], rule='other', severity='LOW', status='reproduced'))
         with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
             path = Path(directory) / 'evidence.json'
@@ -126,10 +205,42 @@ class SelectionTests(unittest.TestCase):
                 self.assertIn(module.markdown_text(item['reason']), output)
             self.assertIn('not disclosure approval', output)
 
+    def test_cli_saved_policy_overrides_recompute_card_after_original_validation(self):
+        module = load_report()
+        legacy = json.loads((SCRIPT.parents[3] / 'tests/fixtures/v021-complete.json').read_text())
+        documents = [legacy, json.loads((SCRIPT.parents[3] / 'tests/fixtures/v021-disabled-policy.json').read_text()),
+                     module.normalize(recorded_document()),
+                     module.normalize(recorded_document(dict(synthetic_document(), jev_policy={'enabled': False}))),
+                     module.normalize(recorded_document(dict(synthetic_document(), findings=[], jev_policy={})))]
+        with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
+            path = Path(directory) / 'saved.json'
+            for document in documents:
+                for flags, enabled, threshold in [([], False, 'MEDIUM'), (['--enabled'], True, 'MEDIUM'),
+                        (['--enabled', '--min-severity', 'CRITICAL'], True, 'CRITICAL')]:
+                    path.write_text(json.dumps(document))
+                    with self.subTest(profile=document.get('audit_profile'), flags=flags):
+                        run = subprocess.run([sys.executable, str(SCRIPT), str(path), *flags], capture_output=True)
+                        self.assertEqual(run.returncode, 0, run.stderr)
+                        queue = json.loads(run.stdout)
+                        self.assertEqual(queue['policy']['enabled'], enabled)
+                        self.assertEqual(queue['policy']['min_severity'], threshold)
+                        self.assertEqual(len(queue['queue']), len(document['findings']))
+                        for item in queue['queue']:
+                            self.assertEqual(item['eligible'], threshold != 'CRITICAL')
+                for field in ('completion_gate', 'security_scorecard', 'jev_selection'):
+                    if field not in document:
+                        continue
+                    forged = copy.deepcopy(document)
+                    forged[field] = {}
+                    path.write_text(json.dumps(forged))
+                    run = subprocess.run([sys.executable, str(SCRIPT), str(path), '--enabled'], capture_output=True)
+                    self.assertNotEqual(run.returncode, 0)
+                    self.assertEqual(run.stdout, b'')
+
     def test_cli_invalid_evidence_and_arguments_emit_no_queue(self):
         with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
             path = Path(directory) / 'PRIVATE.json'
-            document = synthetic_document()
+            document = recorded_document()
             documents = [dict(document, findings=document['findings'] * 2),
                          dict(document, findings=[dict(document['findings'][0], severity='PRIVATE')]),
                          dict(document, jev_policy=dict(enabled='PRIVATE')),
@@ -162,7 +273,7 @@ class SelectionTests(unittest.TestCase):
             spec.loader.exec_module(module)
         with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
             path = Path(directory) / 'evidence.json'
-            path.write_text(json.dumps(synthetic_document()), encoding='utf-8')
+            path.write_text(json.dumps(recorded_document()), encoding='utf-8')
             output = io.StringIO()
             def forbid_key_access(name, default=None):
                 if name == 'TYPESAFE_API_KEY':

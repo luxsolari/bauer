@@ -73,9 +73,20 @@ def scope_state(document) -> Optional[dict[str, Any]]:
                 cve_assessment_evidence=scope['cve_assessment_evidence'])
 
 
-def evaluate(document):
+def evaluate(document, legacy=False):
+    """Legacy validates the frozen v1 contract, before any v2 migration."""
     registry = json.loads((Path(__file__).resolve().parent.parent / 'references/security-sources.json').read_text(encoding='utf-8'))
     ids = [s['id'] for s in registry['sources']] + ['dependency_coverage', 'remote_configuration']
+    from importlib.util import module_from_spec, spec_from_file_location
+    spec = spec_from_file_location('bauer_profiles', Path(__file__).resolve().parent / 'profiles.py')
+    if spec is None or spec.loader is None:
+        raise ValueError('audit profiles unavailable')
+    profiles = module_from_spec(spec)
+    spec.loader.exec_module(profiles)
+    if 'audit_profile' in document and document['audit_profile'] is None:
+        raise ValueError('audit profile must be an object')
+    profile = profiles.normalize(document.get('audit_profile'))
+    selected = set(profile['selected_sources']) | {'dependency_coverage', 'remote_configuration'}
     scope = scope_state(document)
     if scope is not None:
         ids += ['remote:' + target for target in scope['remote_targets']]
@@ -127,7 +138,28 @@ def evaluate(document):
         if by_id[identifier]['status'] == 'not_applicable' and (
                 not coverage_complete or scope is None or scope['published_cve_ids']):
             by_id[identifier].update(satisfied=False, gate_reason='Absence of applicable published CVEs not established over resolved scope')
-    return dict(policy_version='bauer-completion-v1', status='complete' if all(r['satisfied'] for r in rows) else 'partial',
+    if legacy:
+        return dict(policy_version='bauer-completion-v1',
+                    status='complete' if all(r['satisfied'] for r in rows) else 'partial',
+                    obligations=rows, dependency_coverage=scope['coverage'] if scope is not None else None,
+                    assessed_scope=scope,
+                    authority='Supplied evidence trace validation only; not truth verification or safety certification.')
+    for identifier in ('cve', 'ghsa', 'vendor', 'nvd', 'kev', 'epss'):
+        if identifier in selected:
+            prerequisites = profiles.PREREQUISITES[identifier]
+            if (not coverage_complete or not by_id['dependency_coverage']['satisfied'] or
+                    any(not by_id[p]['satisfied'] for p in prerequisites)):
+                by_id[identifier].update(satisfied=False, gate_reason='Selected prerequisite or dependency inventory unresolved')
+    for row in rows:
+        row['selected'] = row['id'] in selected or row['id'].startswith('remote:')
+        if not row['selected']:
+            original = {k: row[k] for k in ('id', 'applicability', 'status', 'reason', 'evidence')} if row['record_supplied'] else None
+            row.update(applicability='out_of_scope', status='out_of_scope', satisfied=False,
+                       reason='Not selected by audit profile' + ('; supplied record ignored for completion' if original else ''),
+                       evidence='', supplied_record=original)
+            row.pop('gate_reason', None)
+    return dict(policy_version='bauer-completion-v2', audit_profile=profile,
+                status='complete' if all(r['satisfied'] for r in rows if r['selected']) else 'partial',
                 obligations=rows, dependency_coverage=scope['coverage'] if scope is not None else None,
                 assessed_scope=scope,
                 authority='Supplied evidence trace validation only; not truth verification or safety certification.')

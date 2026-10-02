@@ -1,20 +1,16 @@
-# Supply-chain audit
+# Supply-chain review
 
-Review supply-chain evidence explicitly, not merely as dependency CVE lookup. Use selected OWASP Web/LLM supply-chain categories, SLSA source/build requirements and relevant OpenSSF Scorecard checks. Retrieve and freeze published framework versions; never assert a SLSA level from a few observed practices or a Scorecard score.
+Core source/CI/build/release and relevant remote checks remain part of the scoped audit. Apply version-qualified SLSA/OpenSSF Scorecard frameworks only when selected by the profile. A few observed practices or an aggregate score cannot establish conformance/trust.
 
-## Audit surfaces
+| Surface | Evidence to inspect |
+| --- | --- |
+| Dependencies | Full resolved inventory, advisories/malware, maintained branches, origins/registry precedence, confusion risk, hooks and updates. Missing integrity/origin is a gap, not maliciousness. |
+| Source | Review/protection enforcement, bypasses, release refs and publishing identities. Local config is not server enforcement. |
+| CI | Untrusted inputs reaching privileged jobs, injection, token/secret boundaries, immutable workflow/action refs, caches/artifact handoffs and runner isolation. Pins establish identity, not benignness. |
+| Build | Toolchain/container digests, downloads, isolation, resolution, provenance and expected builder. Do not execute builds merely to inspect them. |
+| Release | Revision/artifact binding, signatures/provenance verified against expected identity and policy, upload permissions/approvals, mutable tags, channels and rollback. Signature presence alone is insufficient. |
+| AI artifacts | Model/adapter/dataset/tool/MCP origins, revisions, licensing/integrity, deserialization and data write permissions. Never deserialize unknown artifacts. |
 
-- Dependencies: resolved direct/transitive inventory, advisory and malware matches, maintained branches, package origins, private/public registry precedence, dependency confusion, uncontrolled installation hooks and updates. Missing origin or integrity evidence is a gap, not proof of maliciousness.
-- Source: review protections, permitted bypasses, protected release branches/tags and publishing identities. Local configuration is not server-side enforcement; query read-only repository settings only with authorized access.
-- CI: untrusted pull-request inputs reaching privileged jobs, workflow/shell injection, minimal token permissions, secret boundaries, reusable workflow/action pinning, caches, artifact handoffs and persistent/self-hosted runner isolation. Immutable pins establish identity, not that the pinned code is benign.
-- Build: toolchain/container origin and immutable digests, verified downloads, build isolation, dependency resolution, provenance generation and expected builder identity. Do not execute builds merely to inspect them.
-- Release/distribution: source revision-to-artifact digest binding, trusted signing/provenance verification against expected identity and policy, registry upload permissions, release approvals, mutable tags, update-channel integrity and rollback. A signature without expected identity verification is insufficient.
-- AI artifacts: model/adapter and dataset origins, revision pinning, integrity/licensing evidence, risky deserialization, third-party tools/MCP packages, retrieval/training data provenance and write permissions. Never deserialize unknown artifacts for inspection.
+Record controls in supply_chain_checks with stable ID, framework/version, reviewed/not_applicable/not_tested, reason and evidence. Inaccessible settings/registries/builders/attestations stay `not_tested`. Authorized read-only remote access is required; never change protections, publish or read secrets. Completion uses the core/selected ledger in `report.md`, not supplemental rows alone.
 
-## Evidence and limitations
-
-Record every selected control in supplemental `supply_chain_checks` with stable control ID, framework/version reference, reviewed/not_applicable/not_tested, reason and evidence. Settings, registries, builders, attestations and deployment details inaccessible from the checkout are `not_tested`, not assumed safe or absent. Read-only API access still requires authorization; never change protections, publish artifacts or access secrets as part of an audit.
-
-OpenSSF Scorecard per-check results can support investigation when available for the relevant repository/revision. Record revision/time/tool version and incomplete checks; do not use an aggregate score as a trust decision. Obtain permission before installing/running scanners. Existing SBOMs and attestations are evidence to validate, not proof by their mere presence.
-
-Follow `references/advisories.md` for advisory matching and disclosure boundaries. Findings retain severity, evidence status and threat prioritization separately. These are agent-mediated checks; no automated SBOM generation, provenance/signature verifier or Scorecard runner ships in this initial implementation.
+Scorecard evidence needs relevant repository/revision/time/tool version and incomplete checks; aggregate ratings are not trust decisions. Scanner installation/execution needs permission. SBOM/attestation presence is evidence to validate. No SBOM generator, signature/provenance verifier or Scorecard runner ships. Advisory disclosure rules: `advisories.md`.

@@ -226,7 +226,7 @@ class SourcesTests(unittest.TestCase):
             raise OSError("network unavailable")
         with tempfile.TemporaryDirectory() as directory, patch("sys.stdout", new_callable=io.StringIO):
             self.assertEqual(main(["--output-dir", directory], opener=opener), 1)
-            manifest = json.loads(Path(directory, "sources.json").read_text())
+            manifest = json.loads(Path(directory, "sources.json").read_text(encoding='utf-8'))
             self.assertEqual(manifest["web"]["status"], "verified")
             self.assertEqual(manifest["llm"]["status"], "error")
             self.assertEqual(manifest["llm"]["error"], "transport_error")
@@ -296,7 +296,7 @@ class SourcesTests(unittest.TestCase):
                 raise http.client.BadStatusLine("broken server response")
             with self.subTest(failure=failure), tempfile.TemporaryDirectory() as directory, patch("sys.stdout", new_callable=io.StringIO) as stdout:
                 self.assertEqual(sources.main(["--output-dir", directory], opener=opener), 1)
-                manifest = json.loads(Path(directory, "sources.json").read_text())
+                manifest = json.loads(Path(directory, "sources.json").read_text(encoding='utf-8'))
                 self.assertEqual(manifest["llm"]["status"], "error")
                 self.assertEqual(len(manifest["sources"]), 1)
                 self.assertEqual(manifest["llm"]["sources"], manifest["sources"])
@@ -315,7 +315,7 @@ class SourcesTests(unittest.TestCase):
                 raise failure
             with self.subTest(code=code, kind=type(failure).__name__), tempfile.TemporaryDirectory() as directory, patch("sys.stdout", new_callable=io.StringIO) as stdout:
                 self.assertEqual(sources.main(["--output-dir", directory], opener=opener), 1)
-                persisted = Path(directory, "sources.json").read_text()
+                persisted = Path(directory, "sources.json").read_text(encoding='utf-8')
                 self.assertEqual(persisted, stdout.getvalue())
                 manifest = json.loads(persisted)
                 for framework in ("web", "llm"):
@@ -332,7 +332,7 @@ class SourcesTests(unittest.TestCase):
             raise OSError("offline")
         with tempfile.TemporaryDirectory() as directory, patch("sys.stdout", new_callable=io.StringIO):
             self.assertEqual(sources.main(["--output-dir", directory], opener=opener), 1)
-            manifest = json.loads(Path(directory, "sources.json").read_text())
+            manifest = json.loads(Path(directory, "sources.json").read_text(encoding='utf-8'))
             self.assertEqual(len(manifest["sources"]), 1)
             self.assertEqual(manifest["sources"][0]["url"], "https://genai.owasp.org/")
             self.assertEqual(manifest["llm"]["sources"], manifest["sources"])

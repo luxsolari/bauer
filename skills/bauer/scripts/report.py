@@ -21,9 +21,41 @@ IDENTIFIER = re.compile(r'(?:A|LLM)(?:0[1-9]|10):20[0-9]{2}')
 def normalize(document):
     if not isinstance(document, dict):
         raise ValueError('audit must be an object')
+    expected_origin = 'preflight_run_record' if 'run_record' in document else 'historical_saved_report'
+    if 'report_origin' in document and document['report_origin'] != expected_origin:
+        raise ValueError('report origin contradicts supplied record')
+    if 'run_record' in document:
+        from importlib.util import module_from_spec, spec_from_file_location
+        spec = spec_from_file_location('bauer_run_record', Path(__file__).resolve().parent / 'run_record.py')
+        if spec is None or spec.loader is None:
+            raise ValueError('run record validator unavailable')
+        run_record = module_from_spec(spec)
+        spec.loader.exec_module(run_record)
+        record = run_record.validate(document['run_record'], require_confirmed=True)
+        gate = document.get('completion_gate')
+        if 'completion_migration' in document or (isinstance(gate, dict) and gate.get('policy_version') == 'bauer-completion-v1'):
+            raise ValueError('historical completion cannot become a new audit')
+        if 'audit_profile' in document and (document['audit_profile'] is None or
+                run_record.normalize_profile(document['audit_profile']) != record['audit_profile']):
+            raise ValueError('audit profile contradicts pinned run')
+        expected = dict(run_id=record['run_id'], record_id=record['record_id'], **record['host_environment'],
+                        review_decision=record['review_decision'], profile_decision=record['profile_decision'],
+                        scope_change=record['scope_change'], confirmation_status=record['status'],
+                        explicit_user_disable=record['review_decision']['state'] == 'explicit_disable_captured')
+        for key, value in expected.items():
+            if key in document and (type(document[key]) is not type(value) or document[key] != value):
+                raise ValueError('preflight metadata contradicts pinned run')
+        document = dict(document, audit_profile=record['audit_profile'])
     for field in ('scope',):
         if not isinstance(document.get(field), str) or not document[field].strip():
             raise ValueError('missing audit scope')
+    for field in ('revision', 'audited_at'):
+        if field in document and (not isinstance(document[field], str) or not document[field].strip()):
+            raise ValueError('invalid audit metadata')
+    if 'audited_at' in document:
+        timestamp = datetime.fromisoformat(document['audited_at'].replace('Z', '+00:00'))
+        if timestamp.tzinfo is None:
+            raise ValueError('audit time requires timezone')
     for field in ('sources', 'coverage', 'limitations', 'findings'):
         if not isinstance(document.get(field), list):
             raise ValueError('missing audit list: ' + field)
@@ -95,6 +127,13 @@ def normalize(document):
         if not isinstance(source, dict):
             raise ValueError('finding must be an object')
         finding = dict(source)
+        supplemental = finding.get('jev')
+        if ('run_record' in document and isinstance(supplemental, dict) and
+                supplemental.get('status') in ('explicitly_disabled', 'explicit_disable_captured')):
+            decision = document['run_record']['review_decision']
+            if (decision['state'] != 'explicit_disable_captured' or
+                    supplemental.get('decision_ref') != decision['decision_ref']):
+                raise ValueError('supplemental user disable requires matching captured decision reference')
         for field in ('rule', 'path', 'title', 'evidence', 'remediation', 'verification'):
             if not isinstance(finding.get(field), str) or not finding[field].strip():
                 raise ValueError('missing finding text: ' + field)
@@ -107,6 +146,22 @@ def normalize(document):
             raise ValueError('invalid severity')
         if finding.get('status') not in ('candidate', 'supported', 'reproduced'):
             raise ValueError('invalid evidence status')
+        state = finding.get('remediation_state', 'open')
+        if state not in ('open', 'fix_reported', 'fix_verified'):
+            raise ValueError('invalid remediation state')
+        if state != 'open':
+            evidence = finding.get('remediation_evidence')
+            required = {'fix_revision', 'report_evidence'}
+            if state == 'fix_verified':
+                required |= {'verified_revision', 'verification_evidence', 'verification_result'}
+            if (not isinstance(evidence, dict) or set(evidence) != required or
+                    any(not isinstance(v, str) or not v.strip() for v in evidence.values())):
+                raise ValueError('missing remediation evidence')
+            if state == 'fix_verified' and (evidence['fix_revision'] != evidence['verified_revision'] or
+                                           evidence['verification_result'] != 'passed'):
+                raise ValueError('fix verification requires matching revision and passed evidence')
+        elif 'remediation_evidence' in finding:
+            raise ValueError('open state cannot claim remediation evidence')
         categories = finding.get('categories')
         if not isinstance(categories, list) or not categories or any(
             not isinstance(c, str) or not IDENTIFIER.fullmatch(c)
@@ -138,6 +193,9 @@ def normalize(document):
         if (policy['policy_version'] != 'bauer-jev-selection-v1' or type(policy['enabled']) is not bool
                 or policy['min_severity'] not in SEVERITIES):
             raise ValueError('invalid Jev policy metadata')
+        if ('run_record' in document and policy['enabled'] and
+                document['run_record']['review_decision']['state'] == 'explicit_disable_captured'):
+            raise ValueError('captured disable requires a new preflight before scheduling')
         result['jev_policy'] = policy
         queue = []
         for item in findings:
@@ -149,6 +207,9 @@ def normalize(document):
             queue.append(dict(id=item['id'], severity=item['severity'], status=item['status'],
                               eligible=eligible, state=state, reason=reason))
         result['jev_selection'] = dict(policy=policy, queue=queue)
+        if 'run_record' in document:
+            result['jev_selection']['run_id'] = document['run_record']['run_id']
+            result['jev_selection']['record_id'] = document['run_record']['record_id']
         if ('jev_selection' in document and
                 json.dumps(document['jev_selection'], sort_keys=True, allow_nan=False) !=
                 json.dumps(result['jev_selection'], sort_keys=True, allow_nan=False)):
@@ -159,11 +220,42 @@ def normalize(document):
         raise ValueError('completion gate unavailable')
     completion = module_from_spec(spec)
     spec.loader.exec_module(completion)
-    result['completion_gate'] = completion.evaluate(document)
-    if ('completion_gate' in document and
+    supplied_gate = document.get('completion_gate')
+    legacy = (isinstance(supplied_gate, dict) and
+              supplied_gate.get('policy_version') == 'bauer-completion-v1')
+    gate_input = document
+    if legacy:
+        if 'audit_profile' in document or 'completion_migration' in document:
+            raise ValueError('legacy gate requires original unprofiled evidence')
+        expected = completion.evaluate(document, legacy=True)
+        if json.dumps(supplied_gate, sort_keys=True, allow_nan=False) != json.dumps(expected, sort_keys=True, allow_nan=False):
+            raise ValueError('legacy completion metadata does not match supplied records')
+        gate_input = dict(document, audit_profile={'mode': 'full'})
+        result['completion_migration'] = dict(from_policy='bauer-completion-v1',
+                                             to_policy='bauer-completion-v2', legacy_gate=expected)
+    elif 'completion_migration' in document:
+        migration = document['completion_migration']
+        expected = dict(from_policy='bauer-completion-v1', to_policy='bauer-completion-v2',
+                        legacy_gate=completion.evaluate(document, legacy=True))
+        if (json.dumps(migration, sort_keys=True, allow_nan=False) != json.dumps(expected, sort_keys=True, allow_nan=False)
+                or document.get('audit_profile', {}).get('mode') != 'full'):
+            raise ValueError('invalid completion migration')
+    result['completion_gate'] = completion.evaluate(gate_input)
+    result['audit_profile'] = result['completion_gate']['audit_profile']
+    if (not legacy and 'completion_gate' in document and
             json.dumps(document['completion_gate'], sort_keys=True, allow_nan=False) !=
             json.dumps(result['completion_gate'], sort_keys=True, allow_nan=False)):
         raise ValueError('completion metadata does not match supplied records')
+    spec = spec_from_file_location('bauer_scorecard', Path(__file__).resolve().parent / 'scorecard.py')
+    if spec is None or spec.loader is None:
+        raise ValueError('scorecard unavailable')
+    scorecard = module_from_spec(spec)
+    spec.loader.exec_module(scorecard)
+    result['security_scorecard'] = scorecard.build(result)
+    if ('security_scorecard' in document and
+            json.dumps(document['security_scorecard'], sort_keys=True, allow_nan=False) !=
+            json.dumps(result['security_scorecard'], sort_keys=True, allow_nan=False)):
+        raise ValueError('scorecard does not match supplied evidence')
     return result
 
 
@@ -198,17 +290,41 @@ def markdown_code(value):
 def render_markdown(report):
     """Render an already normalized report without collecting new evidence."""
     text = markdown_text
+    from importlib.util import module_from_spec, spec_from_file_location
+    spec = spec_from_file_location('bauer_scorecard', Path(__file__).resolve().parent / 'scorecard.py')
+    if spec is None or spec.loader is None:
+        raise ValueError('scorecard unavailable')
+    scorecard = module_from_spec(spec)
+    spec.loader.exec_module(scorecard)
     lines = ['# Bauer audit report', '', 'Scope: ' + text(report['scope']), '',
-             '## Resource note', '', RESOURCE_NOTE, '', '## Severity counts', '']
+             '## Resource note', '', RESOURCE_NOTE, '']
+    if report.get('report_origin') == 'historical_saved_report':
+        lines.extend(['Historical saved report normalization only; not new-audit completion evidence.', ''])
+    if 'run_record' in report:
+        record = report['run_record']
+        lines.extend(['## Run record', '', 'Run ID: ' + record['run_id'],
+                      'Confirmed record: ' + record['record_id'] + '; status: ' + record['status'],
+                      'Response reference: ' + text(record['confirmation']['response_ref']),
+                      'Profile: ' + text(record['audit_profile']), text(record['authority']), ''])
+    lines.extend(scorecard.markdown(report['security_scorecard'], text))
+    lines.extend(['', '## Severity counts', ''])
     lines.extend(['| Severity | Count |', '| --- | --- |'])
     lines.extend('| ' + level + ' | ' + str(report['counts'][level]) + ' |' for level in SEVERITIES)
     gate = report['completion_gate']
+    if 'completion_migration' in report:
+        migration = report['completion_migration']
+        lines.extend(['', '## Completion policy migration', '',
+                      text(migration['from_policy'] + ' → ' + migration['to_policy'] +
+                           '; historical Full scope preserved; original status: ' + migration['legacy_gate']['status']),
+                      'Original validated gate retained in JSON; current v2 prerequisites may add blockers.'])
     lines.extend(['', '## Completion and applicability', '', 'Overall: ' + gate['status'], '',
                   text(gate['authority']), '',
                   '| Obligation | Applicability | Outcome | Satisfied | Reason | Evidence |',
                   '| --- | --- | --- | --- | --- | --- |'])
     for row in gate['obligations']:
         reason = row['reason'] + ('; Gate: ' + row['gate_reason'] if 'gate_reason' in row else '')
+        if row.get('supplied_record') is not None:
+            reason += '; Ignored supplied record: ' + json.dumps(row['supplied_record'], sort_keys=True, allow_nan=False)
         lines.append('| ' + ' | '.join(text(v) for v in (row['id'], row['applicability'], row['status'],
                      row['satisfied'], reason, row['evidence'])) + ' |')
     if gate['dependency_coverage'] is not None:
@@ -282,13 +398,52 @@ def unique_object(pairs):
     return result
 
 
+def bind_run_record(document, record):
+    """Bind supplied original snapshot without repairing an embedded mismatch."""
+    if not isinstance(document, dict):
+        raise ValueError('audit must be an object')
+    if ('run_record' in document and json.dumps(document['run_record'], sort_keys=True, allow_nan=False) !=
+            json.dumps(record, sort_keys=True, allow_nan=False)):
+        raise ValueError('embedded record differs from original file')
+    return dict(document, run_record=record)
+
+
+def normalize_new_evidence(document):
+    """CLI new-audit boundary; normalize itself remains an aggregation API."""
+    if not isinstance(document, dict) or 'run_record' not in document:
+        raise ValueError('new audit requires a confirmed run record')
+    return normalize(document)
+
+
+def normalize_saved(document):
+    """Validate the original saved gate and all derived metadata, never raw input."""
+    if (not isinstance(document, dict) or 'run_record' in document or
+            not isinstance(document.get('completion_gate'), dict)):
+        raise ValueError('historical normalization requires an original saved gate, not a new run')
+    return dict(normalize(document), report_origin='historical_saved_report')
+
+
 def main():
-    parser = SafeArgumentParser(description=__doc__)
+    parser = SafeArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('evidence', type=Path)
     parser.add_argument('--format', choices=('json', 'markdown'), default='json')
+    parser.add_argument('--run-record', type=Path)
+    parser.add_argument('--saved-report', action='store_true', help='Normalize an existing validated report as historical; never raw evidence')
     args = parser.parse_args()
     try:
-        report = normalize(json.loads(args.evidence.read_text(encoding='utf-8'), object_pairs_hook=unique_object))
+        document = json.loads(args.evidence.read_text(encoding='utf-8'), object_pairs_hook=unique_object)
+        if not isinstance(document, dict):
+            raise ValueError('audit must be an object')
+        if args.run_record is not None:
+            record = json.loads(args.run_record.read_text(encoding='utf-8'), object_pairs_hook=unique_object)
+            document = bind_run_record(document, record)
+        if args.saved_report:
+            if args.run_record is not None:
+                raise ValueError('historical normalization cannot bind a new record')
+            report = normalize_saved(document)
+        else:
+            report = normalize_new_evidence(document)
+        report['report_origin'] = 'historical_saved_report' if args.saved_report else 'preflight_run_record'
         normalized_json = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + '\n'
         output = normalized_json if args.format == 'json' else render_markdown(report)
     except (OSError, ValueError, TypeError, RecursionError):

@@ -26,6 +26,28 @@ def synthetic_document() -> dict:
                                verification='Local trace; runtime not tested')])
 
 
+def confirm_fixture(record):
+    """Synthetic CLI response, not runtime user consent."""
+    env = {k: v for k, v in os.environ.items() if k in ('PATH', 'HOME', 'SYSTEMROOT', 'TMPDIR')}
+    with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
+        path = pathlib.Path(directory) / 'pending.json'
+        path.write_text(json.dumps(record))
+        run = subprocess.run([sys.executable, str(SCRIPT.with_name('control.py')), 'confirm',
+                              '--run-record', str(path), '--decision', 'confirm',
+                              '--user-response', 'Synthetic fixture: confirm this record.',
+                              '--response-ref', 'fixture:second-response'],
+                             env=env, capture_output=True, text=True, check=True)
+        return json.loads(run.stdout)['run_record']
+
+
+def recorded_document(document=None):
+    env = {k: v for k, v in os.environ.items() if k in ('PATH', 'HOME', 'SYSTEMROOT', 'TMPDIR')}
+    run = subprocess.run([sys.executable, str(SCRIPT.with_name('control.py')), 'preflight'],
+                         env=env, capture_output=True, text=True, check=True)
+    return dict(synthetic_document() if document is None else document,
+                run_record=confirm_fixture(json.loads(run.stdout)['run_record']))
+
+
 class ReportTests(unittest.TestCase):
     def test_cli_resource_warning_is_generated_in_both_formats(self):
         warning = ('Security audits can be token-intensive: repository tracing, source queries, '
@@ -34,7 +56,7 @@ class ReportTests(unittest.TestCase):
                    'cannot be predicted here. Optional Jev review may incur separate provider charges.')
         with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
             path = pathlib.Path(directory) / 'synthetic.json'
-            path.write_text(json.dumps(synthetic_document()), encoding='utf-8')
+            path.write_text(json.dumps(recorded_document()), encoding='utf-8')
             def run(format):
                 return subprocess.run([sys.executable, str(SCRIPT), str(path), '--format', format],
                                       capture_output=True, text=True, timeout=10)
@@ -87,6 +109,24 @@ class ReportTests(unittest.TestCase):
                 self.assertTrue(rendered.startswith('` ') and rendered.endswith(' `'))
                 self.assertNotIn('https://', rendered)
 
+    def test_cli_rejects_nonobject_roots_for_new_and_saved_reports(self):
+        roots = [[], ['run_record'], 'SECRET', 'run_record', None, True, False, 0, 1.5]
+        with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
+            path = pathlib.Path(directory) / 'synthetic.json'
+            for root in roots:
+                path.write_text(json.dumps(root), encoding='utf-8')
+                for saved in (False, True):
+                    for format in ('json', 'markdown'):
+                        arguments = [sys.executable, str(SCRIPT), str(path), '--format', format]
+                        if saved:
+                            arguments.append('--saved-report')
+                        result = subprocess.run(arguments, capture_output=True, text=True, timeout=10)
+                        with self.subTest(root=root, saved=saved, format=format):
+                            self.assertEqual(result.returncode, 1)
+                            self.assertEqual(result.stdout, '')
+                            self.assertEqual(result.stderr, 'bauer report: invalid input\n')
+                            self.assertNotIn('Traceback', result.stderr)
+
     def test_cli_rejects_ambiguous_or_nonfinite_json_in_both_formats(self):
         with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
             path = pathlib.Path(directory) / 'synthetic.json'
@@ -130,7 +170,7 @@ class ReportTests(unittest.TestCase):
 
     def test_cli_formats_share_normalized_data_and_default_stays_json(self):
         module = load_report()
-        document = synthetic_document()
+        document = recorded_document()
         with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
             path = pathlib.Path(directory) / 'synthetic.json'
             path.write_text(json.dumps(document), encoding='utf-8')
@@ -144,7 +184,7 @@ class ReportTests(unittest.TestCase):
             self.assertEqual(explicit.returncode, 0, explicit.stderr)
             self.assertEqual(default.stdout, explicit.stdout)
             self.assertEqual(default.stdout, run().stdout)
-            self.assertEqual(json.loads(default.stdout), module.normalize(document))
+            self.assertEqual(json.loads(default.stdout), dict(module.normalize(document), report_origin='preflight_run_record'))
             self.assertEqual(markdown.returncode, 0, markdown.stderr)
             self.assertEqual(markdown.stdout, module.render_markdown(json.loads(default.stdout)))
             self.assertEqual(markdown.stdout, run('--format', 'markdown').stdout)

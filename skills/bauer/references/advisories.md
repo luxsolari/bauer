@@ -1,33 +1,37 @@
-# Dependency advisories and root-cause classification
+# Dependency advisories and CWE
 
-Read `references/security-sources.json` for the approved source registry. OWASP retrieval and OSV inventory queries have bundled helpers; other sources are agent-mediated using available web/terminal tools. Record actual queries and failures; a source listed here is not automatically checked. Inspect `scripts/dependencies.py --help` and supply `{ "packages": [{ "ecosystem": "PyPI", "name": "public-name", "version": "1.2.3" }] }` using actual resolved identities, not this example. Invoke through the terminal tool with `--allow-inventory-disclosure` only after approval, and `--output` for frozen result/provenance. No resolver or repository scanner runs inside this helper; OSV's upstream matching may be fuzzy, so applicability still requires review.
+Use selected obligations from `report.md` and IDs from `security-sources.json`. Only OWASP/OSV have bundled clients; other checks are agent-mediated. A registered source is not automatically checked.
 
 ## Inventory and disclosure
 
-Inspect manifests, lockfiles, SBOMs and deployed component records without executing installers. Prefer exact resolved ecosystem/name/version or commit and record direct/transitive and runtime/build/development context. Constraints are not resolved versions. Unknown versions or missing transitive inventory remain gaps. Do not resolve dependencies by running untrusted package hooks. SBOMs describe inventory, not safety.
+Inspect manifests, lockfiles, SBOMs and deployed component records without installers. Record exact resolved ecosystem/name/version or supported commit plus direct/transitive/runtime/build/dev context. Constraints, missing versions and incomplete transitive inventories remain gaps. SBOMs are inventory evidence, not safety; never run untrusted package hooks to resolve them.
 
-External package queries disclose names and versions. Obtain approval for inventory disclosure, especially private packages; minimize queries and do not transmit private names, registry credentials or lockfile contents. Local inspection is not necessarily offline/private when performed by a hosted agent: host provider policies still apply.
+Obtain explicit inventory disclosure approval. External queries reveal names/versions; do not transmit private identities, credentials or lockfiles. Local inspection by a hosted agent is still subject to host-provider policies.
 
-## Source procedure
+Inspect `scripts/dependencies.py --help`. Supply actual approved public identities:
 
-1. Query OSV for exact public package ecosystem/version or supported commit identity using official documented API or an approved installed scanner. Record query, retrieval UTC, source update time and response digest. Follow pagination fully or mark incomplete. Affected-version results are advisory matches, not exploit reproductions.
-2. Supplement using GitHub Advisory Database and verified maintainer references when needed. GitHub reviewed vulnerability queries exclude malware by default: explicitly check relevant malware advisories as a separate query when supply-chain scope requires it. Preserve reviewed/unreviewed/malware distinction.
-3. Verify CVE record identity/state through the CVE Program; consult NVD for enrichment. Keep source-attributed CVSS version/vector and scores separate; conflicting scores remain visible. Match NVD products via established product identity, never fuzzy name alone. Rejected or withdrawn records do not remain active matches without recorded contrary evidence. Reserved records cannot supply a published vulnerability claim.
-4. Deduplicate OSV/GHSA/CVE aliases with package/context awareness. Shared CWE or similar text is not an alias. Preserve each source and affected/fixed ranges. Withdrawn advisories, conflicting ranges, distribution backports and unknown applicability need explicit adjudication; no generic lexical version comparison.
-5. Check applicable CVEs against CISA KEV. Record catalog time and match/no-match/unavailable separately; no match does not prove no exploitation. FIRST EPSS adds score, percentile, observation date and model version when available. Missing scores remain unknown, not zero. EPSS is likelihood of exploitation in the wild, not likelihood this installation is exploitable or severity.
-6. Review vendor/maintainer security advisories for conditions, supported branches, patches, workarounds and backports. Do not assume the latest release is the first fixed version or that upstream version ordering applies to vendor builds. Do not install a suggested fix automatically.
-7. Map custom-code findings to the most specific defensible CWE allowed for vulnerability mapping. Record taxonomy version and mapping rationale. Do not invent CVEs for custom findings. Use ASVS version-qualified requirements to guide applicable control verification, with reviewed/not_applicable/not_tested and cited evidence. No ASVS conformance claim from partial checks.
+```json
+{"packages":[{"ecosystem":"PyPI","name":"public-name","version":"1.2.3"}]}
+```
 
-## Report
+Invoke with `--allow-inventory-disclosure` only after approval; use `--output` for frozen provenance. This helper resolves/scans no repository. OSV upstream matching may be fuzzy; matches still need applicability/reachability review.
 
-Known parser boundary: OSV RFC3339 leap-second timestamps (`:60`) are not supported by the current helper. Such responses fail closed as incomplete/invalid_response, not a zero-finding result. Nanosecond fractions and explicit timezone offsets are supported. Keep this compatibility limitation visible until a tested leap-second policy is implemented.
+Bound: **100 packages per invocation**, 128 KiB, not total audit inventory. Batch the full approved scoped identity set and aggregate deduplicated provenance; complete each identity's pagination. Failed/unsupported/unapproved identities stay gaps. No batch orchestrator ships, and discovered inventory is not automatically approved. Full or Lean never means first-batch sampling.
 
-Keep OWASP category mappings, `cwe_ids`, advisory IDs/aliases, affected package evidence, reachability, source-attributed severity and threat signals distinct. Supplemental objects are retained by the report helper but not fully schema-validated: the agent must validate their values against retrieved sources. Jev can assess bounded supplied evidence, never decide package version arithmetic, alias equivalence or KEV membership.
+## Selected-source procedure
 
-The helper bounds an input to 100 packages per invocation and 128 KiB; this is a local validation/resource bound, not permission to audit only the first batch and not a claim that OSV limits total inventory to 100. After exact inventory-disclosure approval, the agent may split the approved public resolved identities into bounded batches and aggregate deduplicated identity/provenance records. Complete pagination within each identity; failed/unsupported/unapproved identities remain gaps. No automatic batch orchestrator ships. Never assume all discovered identities were approved.
+1. **OSV:** record exact query, UTC retrieval/update time and response digest; complete pagination or mark partial. Matches are not reproductions.
+2. **GHSA:** supplement aliases/maintainer detail as selected. Preserve reviewed/unreviewed/malware distinctions; default reviewed-vulnerability queries exclude malware, so check it separately when relevant.
+3. **CVE/NVD:** establish published record state and product applicability before enrichment; no fuzzy-name-only NVD match. Preserve source-attributed CVSS/version/vector and conflicts. Reserved/rejected/withdrawn records do not support active vulnerability claims without contrary evidence.
+4. **Aliases/ranges:** deduplicate with package/context awareness. Shared CWE/text is not an alias. Retain conflicting affected/fixed ranges, withdrawals, backports and unknown applicability; no lexical version arithmetic.
+5. **KEV/EPSS:** use adjudicated applicable CVEs. Record KEV snapshot/match/no-match/unavailable; absence is not absence of exploitation. EPSS needs date/model/score/percentile; missing is unknown, never zero or severity/reachability.
+6. **Vendor:** verify branches, first fixed builds, patches/workarounds/backports from maintainer evidence. Latest release is not necessarily first fixed. Do not install suggested fixes automatically.
+7. **CWE/ASVS:** defensible mapping-eligible CWE with taxonomy/rationale; no invented custom-code CVE. Selected ASVS uses version-qualified controls and reviewed/not_applicable/not_tested evidence, not partial conformance claims.
 
-Decide applicability for every registered source, including conditional GHSA; CVE/NVD/KEV/EPSS decisions depend on adjudicated applicable published CVEs and resolved inventory coverage. Distinguish never attempted from attempted retrieval failure. Use the mandatory `completion_checks`/`completion_scope` gate in `report.md`; the legacy arrays alone do not establish complete coverage.
+## Reporting and limits
 
-Record source outcomes in `source_checks`: source ID, checked/not_applicable/unavailable, reason, timestamp and snapshot reference. The existing `sources` schema is for year-edition OWASP provenance; preserve non-year framework versions and feed dates in supplemental `source_checks`/`framework_checks` rather than fabricating an edition year.
+Separate OWASP mappings, CWE/aliases, affected-package evidence, reachability, severity and threat signals. Use `completion_checks`/`completion_scope` from `report.md`; supplemental source_checks/framework_checks retain non-year provenance but do not close obligations. Decide selected applicability, including GHSA, with evidence. Unknown/unattempted differs from actual retrieval failure.
 
-Official API documentation: https://google.github.io/osv.dev/api/, https://docs.github.com/en/rest/security-advisories/global-advisories, https://nvd.nist.gov/developers/vulnerabilities, https://www.first.org/epss/.
+OSV leap-second (`:60`) timestamps currently fail closed as incomplete/invalid_response, not zero findings. Nanosecond fractions and offsets are supported. The generic query ledger lacks source-specific OSV applicability; its conservative nonapplicability guard remains documented in `report.md`.
+
+Official APIs: https://google.github.io/osv.dev/api/, https://docs.github.com/en/rest/security-advisories/global-advisories, https://nvd.nist.gov/developers/vulnerabilities, https://www.first.org/epss/.

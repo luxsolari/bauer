@@ -16,18 +16,18 @@ def gate(document):
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module.evaluate(document)
+    return module.evaluate(dict(document, audit_profile=document.get('audit_profile', {'mode': 'full'})))
 
 
 class CompletionTests(unittest.TestCase):
     def test_completion_workflow_is_mandatory_and_scoped(self):
         for relative in ('skills/bauer/SKILL.md', 'skills/bauer/references/report.md', 'README.md'):
-            text = (ROOT / relative).read_text()
+            text = (ROOT / relative).read_text(encoding='utf-8')
             for required in ('completion_checks', 'completion_scope', 'unattempted',
                              'unknown', 'not_applicable', 'permission', 'partial'):
                 with self.subTest(file=relative, term=required):
                     self.assertIn(required, text)
-        self.assertIn('100 packages per invocation', (ROOT / 'skills/bauer/references/advisories.md').read_text())
+        self.assertIn('100 packages per invocation', (ROOT / 'skills/bauer/references/advisories.md').read_text(encoding='utf-8'))
 
     def test_report_json_and_markdown_gate_no_collection(self):
         spec = importlib.util.spec_from_file_location('bauer_report_completion', SCRIPTS / 'report.py')
@@ -52,13 +52,13 @@ class CompletionTests(unittest.TestCase):
         self.assertIn('Permission required', report.render_markdown(normalized))
         # No adapter, environment or network modules are reachable from the gate.
         import ast
-        tree = ast.parse((SCRIPTS / 'completion.py').read_text())
+        tree = ast.parse((SCRIPTS / 'completion.py').read_text(encoding='utf-8'))
         modules = {node.module for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)}
         modules |= {alias.name for node in ast.walk(tree) if isinstance(node, ast.Import) for alias in node.names}
         self.assertFalse(modules & {'os', 'socket', 'subprocess', 'urllib', 'requests', 'jev'})
 
     def complete_fixture(self):
-        ids = [s['id'] for s in json.loads((SCRIPTS.parent / 'references/security-sources.json').read_text())['sources']]
+        ids = [s['id'] for s in json.loads((SCRIPTS.parent / 'references/security-sources.json').read_text(encoding='utf-8'))['sources']]
         ids += ['dependency_coverage', 'remote_configuration']
         return {'completion_checks': [dict(id=i, status='reviewed', applicability='applicable',
                     reason='Fixture scoped control examined', evidence='fixture-evidence.json#' + i) for i in ids],
@@ -216,7 +216,7 @@ class CompletionTests(unittest.TestCase):
 
     def test_missing_obligations_cannot_be_complete(self):
         result = gate({})
-        registry = json.loads((SCRIPTS.parent / 'references/security-sources.json').read_text())
+        registry = json.loads((SCRIPTS.parent / 'references/security-sources.json').read_text(encoding='utf-8'))
         self.assertEqual('partial', result['status'])
         self.assertEqual({s['id'] for s in registry['sources']} | {'dependency_coverage', 'remote_configuration'},
                          {r['id'] for r in result['obligations']})

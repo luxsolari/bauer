@@ -119,7 +119,7 @@ class ControlTests(unittest.TestCase):
                     self.assertNotIn('synthetic-presence-not-a-real-key', out.getvalue() + err.getvalue())
                     mode = json.loads(self.run_cli('mode', *flags).stdout)
                     self.assertEqual(result['audit_profile'], mode['audit_profile'])
-            self.assertEqual(path.read_text(), raw)
+            self.assertEqual(path.read_text(encoding='utf-8'), raw)
             self.assertEqual(list(Path(directory).iterdir()), [path])
         for flags in [('--offline',), ('--jev-disabled=false',), ('--mode', 'bogus')]:
             run = self.run_cli('preflight', *flags)
@@ -181,7 +181,7 @@ class ControlTests(unittest.TestCase):
             run = self.run_cli('mode', '--profile-file', str(path))
             self.assertEqual(run.returncode, 0, run.stderr)
             self.assertEqual(json.loads(run.stdout)['audit_profile']['mode'], 'custom')
-            self.assertEqual(path.read_text(), raw)
+            self.assertEqual(path.read_text(encoding='utf-8'), raw)
             self.assertEqual(list(Path(directory).iterdir()), [path])
         for args in [('mode', '--mode', 'custom'), ('mode', '--mode', 'bogus'),
                      ('mode', '--selected-source', 'osv'), ('mode', '--mode', 'custom', '--selected-source', 'kev'),

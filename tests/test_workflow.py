@@ -49,11 +49,11 @@ class WorkflowTests(unittest.TestCase):
         # Canonical policy lives in one mandatory reference; entry points must
         # require reading it rather than duplicate a drift-prone policy block.
         for relative in ('skills/bauer/SKILL.md', 'README.md'):
-            text = (ROOT / relative).read_text()
+            text = (ROOT / relative).read_text(encoding='utf-8')
             self.assertIn('references/jev.md', text)
             self.assertIn('must read and follow' if relative == 'README.md' else 'Read and follow', text)
         for relative in ('skills/bauer/references/jev.md',):
-            text = (ROOT / relative).read_text()
+            text = (ROOT / relative).read_text(encoding='utf-8')
             for requirement in ('key_present', 'missing_key', 'filtered_environment',
                                 'explicitly_disabled', 'interaction_unavailable',
                                 'not_offered', 'proactively', 'packet approval',
@@ -73,28 +73,28 @@ class WorkflowTests(unittest.TestCase):
             self.assertNotIn('synthetic-presence-only-not-a-key', run.stdout + run.stderr)
 
     def test_mandatory_token_warning_before_full_audit(self):
-        skill = (ROOT / 'skills/bauer/SKILL.md').read_text()
+        skill = (ROOT / 'skills/bauer/SKILL.md').read_text(encoding='utf-8')
         preflight = skill.split('## Procedure')[0]
         for text in ('control.py preflight', 'preflight_message', 'ordinary chat',
                      'Security audits can be token-intensive', 'bounded scope',
                      'Confirmation is mandatory', 'partial', 'continuation'):
             with self.subTest(requirement=text):
                 self.assertIn(text, preflight)
-        readme = (ROOT / 'README.md').read_text().split('## Status')[0]
+        readme = (ROOT / 'README.md').read_text(encoding='utf-8').split('## Status')[0]
         self.assertIn('Security audits can be token-intensive', readme)
 
     def test_profile_control_and_scorecard_workflow_documented(self):
         for relative in ('README.md', 'skills/bauer/SKILL.md', 'skills/bauer/references/report.md'):
-            text = (ROOT / relative).read_text()
+            text = (ROOT / relative).read_text(encoding='utf-8')
             for required in ('Lean', 'Full', 'Custom', 'control.py', 'Security Scorecard', 'audit_profile'):
                 with self.subTest(file=relative, term=required):
                     self.assertIn(required, text)
-        skill = (ROOT / 'skills/bauer/SKILL.md').read_text()
+        skill = (ROOT / 'skills/bauer/SKILL.md').read_text(encoding='utf-8')
         self.assertIn('Lean', skill)
         self.assertIn('No persistent mode', skill)
 
     def test_audit_and_saved_control_routes_have_distinct_ordered_contracts(self):
-        skill = (ROOT / 'skills/bauer/SKILL.md').read_text()
+        skill = (ROOT / 'skills/bauer/SKILL.md').read_text(encoding='utf-8')
         audit = skill.split('## Procedure')[1].split('## Completion')[0]
         self.assertLess(audit.index('**Jev.**'), audit.index('**Report.**'))
         entry = skill.split('## When to use')[0]
@@ -119,17 +119,17 @@ class WorkflowTests(unittest.TestCase):
 
     def test_manifests_and_runtime_support_files_match(self):
         for host in ('claude', 'codex'):
-            manifest = json.loads((ROOT / ('.' + host + '-plugin/plugin.json')).read_text())
+            manifest = json.loads((ROOT / ('.' + host + '-plugin/plugin.json')).read_text(encoding='utf-8'))
             self.assertEqual(manifest['name'], 'bauer')
             self.assertEqual(manifest['version'], '0.3.0')
-        skill = (ROOT / 'skills/bauer/SKILL.md').read_text()
+        skill = (ROOT / 'skills/bauer/SKILL.md').read_text(encoding='utf-8')
         self.assertTrue(skill.startswith('---\n'))
         description = next(line for line in skill.splitlines() if line.startswith('description: '))[13:]
         self.assertLessEqual(len(description), 60)
         for path in ('scripts/report.py', 'scripts/sources.py', 'scripts/jev.py', 'scripts/selection.py',
                      'references/report.md', 'references/jev.md'):
             self.assertTrue((ROOT / 'skills/bauer' / path).is_file(), path)
-        self.assertIn('scripts/jev.py', (ROOT / 'skills/bauer/references/jev.md').read_text())
+        self.assertIn('scripts/jev.py', (ROOT / 'skills/bauer/references/jev.md').read_text(encoding='utf-8'))
 
 
 if __name__ == '__main__':

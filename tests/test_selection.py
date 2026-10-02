@@ -61,7 +61,7 @@ class SelectionTests(unittest.TestCase):
             self.assertEqual(run('--run-record', str(record_path)).returncode, 1)
             self.assertEqual(run('--run-record', str(Path(directory) / 'missing.json')).stdout, b'')
             for name in ('complete', 'asvs-gap', 'disabled-policy'):
-                original = json.loads((SCRIPT.parents[3] / ('tests/fixtures/v021-' + name + '.json')).read_text())
+                original = json.loads((SCRIPT.parents[3] / ('tests/fixtures/v021-' + name + '.json')).read_text(encoding='utf-8'))
                 saved = module.normalize_saved(original)
                 self.assertEqual(saved['audit_profile']['mode'], 'full')
                 self.assertEqual(saved['completion_migration']['legacy_gate'], original['completion_gate'])
@@ -207,8 +207,8 @@ class SelectionTests(unittest.TestCase):
 
     def test_cli_saved_policy_overrides_recompute_card_after_original_validation(self):
         module = load_report()
-        legacy = json.loads((SCRIPT.parents[3] / 'tests/fixtures/v021-complete.json').read_text())
-        documents = [legacy, json.loads((SCRIPT.parents[3] / 'tests/fixtures/v021-disabled-policy.json').read_text()),
+        legacy = json.loads((SCRIPT.parents[3] / 'tests/fixtures/v021-complete.json').read_text(encoding='utf-8'))
+        documents = [legacy, json.loads((SCRIPT.parents[3] / 'tests/fixtures/v021-disabled-policy.json').read_text(encoding='utf-8')),
                      module.normalize(recorded_document()),
                      module.normalize(recorded_document(dict(synthetic_document(), jev_policy={'enabled': False}))),
                      module.normalize(recorded_document(dict(synthetic_document(), findings=[], jev_policy={})))]

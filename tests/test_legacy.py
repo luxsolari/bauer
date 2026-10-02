@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class LegacyTests(unittest.TestCase):
     def fixture(self, name):
-        return json.loads((ROOT / 'tests/fixtures' / ('v021-' + name + '.json')).read_text())
+        return json.loads((ROOT / 'tests/fixtures' / ('v021-' + name + '.json')).read_text(encoding='utf-8'))
 
     def test_saved_v021_complete_and_asvs_gap_migrate_full_after_validation(self):
         module = load_report()

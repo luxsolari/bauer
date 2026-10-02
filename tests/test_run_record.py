@@ -43,11 +43,11 @@ class RunRecordTests(unittest.TestCase):
 
     def test_entry_and_report_docs_require_same_run_without_authority_claims(self):
         for relative in ('README.md', 'skills/bauer/SKILL.md', 'skills/bauer/references/report.md'):
-            text = (ROOT / relative).read_text()
+            text = (ROOT / relative).read_text(encoding='utf-8')
             for term in ('run_record', '--run-record', '--output', 'user_instruction', 'decision_ref'):
                 with self.subTest(relative=relative, term=term):
                     self.assertIn(term, text)
-        contract = (ROOT / 'skills/bauer/references/report.md').read_text()
+        contract = (ROOT / 'skills/bauer/references/report.md').read_text(encoding='utf-8')
         for term in ('--saved-report', 'bauer-run-record-v2', 'pending_host_delivery',
                      'explicit_disable_captured', 'fabricate', 'not_requested', 'scope-change-decision'):
             self.assertIn(term, contract)
@@ -194,7 +194,7 @@ class RunRecordTests(unittest.TestCase):
     def test_saved_report_is_explicit_validated_history_not_raw_bypass(self):
         with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as directory:
             path = Path(directory) / 'saved.json'
-            legacy = json.loads((ROOT / 'tests/fixtures/v021-asvs-gap.json').read_text())
+            legacy = json.loads((ROOT / 'tests/fixtures/v021-asvs-gap.json').read_text(encoding='utf-8'))
             path.write_text(json.dumps(legacy))
             run = self.cli('report.py', path, '--saved-report')
             self.assertEqual(run.returncode, 0, run.stderr)
@@ -260,7 +260,7 @@ class RunRecordTests(unittest.TestCase):
             preflight = self.cli('control.py', 'preflight', '--output', record_path, present=True)
             self.assertEqual(preflight.returncode, 0, preflight.stderr)
             record = json.loads(preflight.stdout)['run_record']
-            self.assertEqual(json.loads(record_path.read_text()), record)
+            self.assertEqual(json.loads(record_path.read_text(encoding='utf-8')), record)
             self.assertIs(record['host_environment']['key_present'], True)
             record = confirm_fixture(record)
             record_path = Path(directory) / 'confirmed.json'

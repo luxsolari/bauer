@@ -427,7 +427,7 @@ class DependencyTests(unittest.TestCase):
                 response.read.return_value = b'{}'
                 code, result = self.run_cli(flags=['--allow-inventory-disclosure'], extra=['--output', str(output_path)])
             self.assertEqual(code, 0)
-            self.assertEqual(json.loads(output_path.read_text()), result)
+            self.assertEqual(json.loads(output_path.read_text(encoding='utf-8')), result)
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as exit:
             self.adapter.main(['--help'])
@@ -504,7 +504,7 @@ class DependencyTests(unittest.TestCase):
             self.assertEqual(len(result['responses']), 2)
             self.assertEqual(result['packages'][0]['pages'], 1)
             self.assertEqual(result['packages'][0]['reason'], 'transport_error')
-            self.assertEqual(json.loads(output.read_text()), result)
+            self.assertEqual(json.loads(output.read_text(encoding='utf-8')), result)
             self.assertNotIn('response_sha256', result['responses'][1])
         code, result = self.response_cli([{'vulns': [self.advisory()], 'next_page_token': 'next'}, b'no json'])[:2]
         self.assertEqual(code, 1)

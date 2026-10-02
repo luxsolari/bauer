@@ -62,11 +62,11 @@ class ConfirmationTests(unittest.TestCase):
 
     def test_host_contract_requires_real_later_turn_and_unsigned_limits(self):
         root = SCRIPTS.parents[2]
-        skill = (root / 'skills/bauer/SKILL.md').read_text()
+        skill = (root / 'skills/bauer/SKILL.md').read_text(encoding='utf-8')
         for required in ('STOP', 'later user response', 'confirm --run-record', 'agent_proposal',
                          'Do not audit in the same response', 'user_response_authenticated', 'decline'):
             self.assertIn(required, skill)
-        contract = (root / 'skills/bauer/references/report.md').read_text()
+        contract = (root / 'skills/bauer/references/report.md').read_text(encoding='utf-8')
         for required in ('bauer-run-record-v2', 'pending_confirmation', '--response-ref',
                          'unsigned', 'not a signature', 'unpublished v1', 'pending_record_id'):
             self.assertIn(required, contract)
@@ -111,7 +111,7 @@ class ConfirmationTests(unittest.TestCase):
                     mock.patch('subprocess.run', side_effect=AssertionError('execution forbidden')):
                 with contextlib.redirect_stdout(io.StringIO()):
                     self.assertEqual(module.main(args), 0)
-                self.assertEqual(json.loads(out.read_text())['confirmation']['user_response'], '  Synthetic exact response.  ')
+                self.assertEqual(json.loads(out.read_text(encoding='utf-8'))['confirmation']['user_response'], '  Synthetic exact response.  ')
                 before = out.read_bytes()
                 with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
                     self.assertEqual(module.main(args), 1)
